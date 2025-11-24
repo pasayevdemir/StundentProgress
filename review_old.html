@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tələbə Qiymətləndirməsi</title>
+    <link rel="stylesheet" href="review.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Tələbə Qiymətləndirmə Sistemi</h1>
+            <button class="logout-btn" onclick="logout()">Çıxış</button>
+        </div>
+
+        <!-- Axtarış Bölməsi -->
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Tələbə adını axtarın və ya yazın..." autocomplete="off">
+                <div id="searchResults" class="search-results"></div>
+            </div>
+        </div>
+
+        <!-- Tələbələr Cədvəli -->
+        <div class="students-table-container">
+            <h2>Tələbələr</h2>
+            <table id="studentsTable" class="students-table">
+                <thead>
+                    <tr>
+                        <th>Adı Soyadı</th>
+                        <th>Email</th>
+                        <th>Cohort</th>
+                        <th>Status</th>
+                        <th>Modullar</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <tr><td colspan="6" style="text-align: center;">Tələbələr yüklənir...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div id="notificationPopup" class="notification-popup hidden">
+        <div class="notification-content">
+            <div class="notification-icon">✓</div>
+            <p id="notificationMessage"></p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="review.js"></script>
+</body>
+</html>

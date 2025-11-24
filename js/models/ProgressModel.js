@@ -1,0 +1,101 @@
+// Progress Model
+class ProgressModel {
+    static async getLatestByStudentId(studentId) {
+        const { data, error } = await supabaseClient
+            .from('Progresses')
+            .select('*')
+            .eq('StudentID', studentId)
+            .order('CreatedAt', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
+    }
+    
+    static async getByStudentIdAndDateRange(studentId, startDate, endDate) {
+        const { data, error } = await supabaseClient
+            .from('Progresses')
+            .select('*')
+            .eq('StudentID', studentId)
+            .gte('CreatedAt', startDate)
+            .lte('CreatedAt', endDate)
+            .order('CreatedAt', { ascending: false });
+        
+        if (error) throw error;
+        return data;
+    }
+    
+    static async create(progressData) {
+        const { data, error } = await supabaseClient
+            .from('Progresses')
+            .insert(progressData)
+            .select();
+        
+        if (error) throw error;
+        return data;
+    }
+    
+    static async getTodaysProgress(studentId) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        const { data, error } = await supabaseClient
+            .from('Progresses')
+            .select('*')
+            .eq('StudentID', studentId)
+            .gte('CreatedAt', today.toISOString())
+            .lt('CreatedAt', tomorrow.toISOString())
+            .order('CreatedAt', { ascending: false })
+            .limit(1);
+        
+        if (error) throw error;
+        return data && data.length > 0 ? data[0] : null;
+    }
+    
+    static async updateTodaysProgress(studentId, progressData) {
+        const todayProgress = await this.getTodaysProgress(studentId);
+        
+        if (todayProgress) {
+            // Update existing
+            const { data, error } = await supabaseClient
+                .from('Progresses')
+                .update(progressData)
+                .eq('ID', todayProgress.ID)
+                .select();
+            
+            if (error) throw error;
+            return data;
+        } else {
+            // Create new
+            return await this.create({
+                StudentID: studentId,
+                ...progressData
+            });
+        }
+    }
+    
+    static calculateDifference(currentProgress, previousProgress) {
+        if (!previousProgress) return null;
+        
+        const differences = {};
+        MODULE_COLUMNS.forEach(module => {
+            const current = currentProgress[module] || 0;
+            const previous = previousProgress[module] || 0;
+            const diff = current - previous;
+            
+            if (diff !== 0) {
+                differences[module] = {
+                    current,
+                    previous,
+                    difference: diff,
+                    percentage: previous > 0 ? ((diff / previous) * 100).toFixed(1) : 'N/A'
+                };
+            }
+        });
+        
+        return differences;
+    }
+}

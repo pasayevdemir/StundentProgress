@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qiymətləndirmə Yazma</title>
+    <link rel="stylesheet" href="write_review.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">← Geri</button>
+            <h1>Tələbə Qiymətləndirmə</h1>
+        </div>
+
+        <!-- Tələbə Məlumatı -->
+        <div class="student-info-container">
+            <div class="student-header">
+                <h2 id="studentName">Tələbə Adı Yüklənir...</h2>
+                <div class="student-details">
+                    <p><strong>Email:</strong> <span id="studentEmail">-</span></p>
+                    <p><strong>Cohort:</strong> <span id="studentCohort">-</span></p>
+                    <p><strong>Status:</strong> <span id="studentStatus">-</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modullar Bölməsi -->
+        <div class="modules-section">
+            <h3>Modullar və İrəliləmə</h3>
+            <div class="modules-grid" id="modulesGrid">
+                <!-- Modullar buraya yüklənəcək -->
+            </div>
+        </div>
+
+        <!-- Əvvəlki Qiymətləndirmələr -->
+        <div class="previous-reviews-section">
+            <h3>Qiymətləndirmələr</h3>
+            <div class="reviews-list" id="reviewsList">
+                <!-- Əvvəlki qiymətləndirmələr buraya yüklənəcək -->
+            </div>
+        </div>
+
+        <!-- Qiymətləndirmə Formu -->
+        <div class="review-form-section">
+            <h3>Qiymətləndirmə Yaz</h3>
+            <form id="reviewForm">
+                <div class="form-group">
+                    <label for="learned">Bu günə kimi nə öyrəndi?</label>
+                    <textarea id="learned" name="learned" rows="5" placeholder="Tələbənin bu günə kimi öyrəndiyi mövzuları yazın..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="today">Bu gün nə edəcəkdir?</label>
+                    <textarea id="today" name="today" rows="5" placeholder="Tələbənin bu gün edəcəyi tapşırıqları yazın..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="feedback">Öz Fikrin</label>
+                    <textarea id="feedback" name="feedback" rows="5" placeholder="Ümumi qiymətləndirmə və təkliflərinizi yazın..." required></textarea>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="button" class="cancel-btn" onclick="goBack()">Ləğv et</button>
+                    <button type="submit" class="submit-btn">Göndər</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div id="notificationPopup" class="notification-popup hidden">
+        <div class="notification-content">
+            <div class="notification-icon">✓</div>
+            <p id="notificationMessage"></p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="write_review.js"></script>
+</body>
+</html>
