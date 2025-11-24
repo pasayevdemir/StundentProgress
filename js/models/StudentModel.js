@@ -27,16 +27,29 @@ class StudentModel {
     }
     
     static async upsert(studentData) {
-        const { data, error } = await supabaseClient
-            .from('Students')
-            .upsert(studentData, { 
-                onConflict: 'LoginName',
-                ignoreDuplicates: false 
-            })
-            .select();
+        // First, check if student exists by LoginName
+        const existing = await this.getByLoginName(studentData.LoginName);
         
-        if (error) throw error;
-        return data;
+        if (existing) {
+            // Update existing student
+            const { data, error } = await supabaseClient
+                .from('Students')
+                .update(studentData)
+                .eq('ID', existing.ID)
+                .select();
+            
+            if (error) throw error;
+            return data;
+        } else {
+            // Insert new student
+            const { data, error } = await supabaseClient
+                .from('Students')
+                .insert(studentData)
+                .select();
+            
+            if (error) throw error;
+            return data;
+        }
     }
     
     static async getByLoginName(loginName) {

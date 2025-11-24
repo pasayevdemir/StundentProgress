@@ -20,7 +20,7 @@ class CSVUploadController {
             
             for (let i = 0; i < rows.length; i++) {
                 const row = rows[i];
-                const validation = CSVParser.validateRow(row, i + 1);
+                const validation = CSVParser.validateRow(row);
                 
                 if (!validation.valid) {
                     this.uploadResults.failed++;
@@ -52,19 +52,12 @@ class CSVUploadController {
         // 1. Tələbə məlumatını çıxart
         const studentData = CSVParser.extractStudentData(row);
         
-        // 2. Tələbəni tap və ya yarat
-        let student = await StudentModel.getByLoginName(studentData.LoginName);
+        // 2. Tələbəni yenilə və ya yarat (upsert)
+        const result = await StudentModel.upsert(studentData);
+        const student = result[0];
         
-        if (student) {
-            // Mövcud tələbəni yenilə
-            await supabaseClient
-                .from('Students')
-                .update(studentData)
-                .eq('ID', student.ID);
-        } else {
-            // Yeni tələbə yarat
-            const result = await StudentModel.upsert(studentData);
-            student = result[0];
+        if (!student || !student.ID) {
+            throw new Error('Tələbə yaradıla bilmədi');
         }
         
         // 3. Progress məlumatını çıxart
