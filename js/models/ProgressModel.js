@@ -13,6 +13,46 @@ class ProgressModel {
         return data;
     }
     
+    static async getLatestByProgressDate(studentId) {
+        const { data, error } = await supabaseClient
+            .from('Progresses')
+            .select('*')
+            .eq('StudentID', studentId)
+            .order('ProgressDate', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
+    }
+    
+    static async getProgressByDate(studentId, progressDate) {
+        const { data, error } = await supabaseClient
+            .from('Progresses')
+            .select('*')
+            .eq('StudentID', studentId)
+            .eq('ProgressDate', progressDate)
+            .limit(1)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
+    }
+    
+    static async getClosestProgressBeforeDate(studentId, targetDate) {
+        const { data, error } = await supabaseClient
+            .from('Progresses')
+            .select('*')
+            .eq('StudentID', studentId)
+            .lt('ProgressDate', targetDate)
+            .order('ProgressDate', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
+    }
+    
     static async getByStudentIdAndDateRange(studentId, startDate, endDate) {
         const { data, error } = await supabaseClient
             .from('Progresses')
@@ -112,8 +152,16 @@ class ProgressModel {
         
         const differences = {};
         MODULE_COLUMNS.forEach(module => {
-            const current = currentProgress[module] || 0;
-            const previous = previousProgress[module] || 0;
+            // Skip if current value is NULL/undefined
+            if (currentProgress[module] === null || currentProgress[module] === undefined) {
+                return;
+            }
+            
+            const current = currentProgress[module];
+            const previous = previousProgress[module] !== null && previousProgress[module] !== undefined 
+                ? previousProgress[module] 
+                : 0; // If previous was NULL, treat as 0 (starting point)
+            
             const diff = current - previous;
             
             if (diff !== 0) {

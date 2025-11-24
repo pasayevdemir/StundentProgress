@@ -239,6 +239,14 @@ body {
     margin-top: -1rem;
     margin-bottom: 1.5rem;
     font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-subtitle::before {
+    content: '📊';
+    font-size: 1rem;
 }
 
 /* Previous Reviews */

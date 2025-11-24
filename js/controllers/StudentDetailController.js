@@ -46,23 +46,33 @@ class StudentDetailController {
     
     async loadProgressData() {
         try {
-            // Get latest progress
-            this.latestProgress = await ProgressModel.getLatestByStudentId(this.studentId);
+            // Get latest progress by ProgressDate (not CreatedAt)
+            this.latestProgress = await ProgressModel.getLatestByProgressDate(this.studentId);
             
-            // Get progress from last review date
-            const reviews = await ReviewModel.getLastWeekReviews(this.studentId);
+            if (!this.latestProgress || !this.latestProgress.ProgressDate) {
+                this.renderProgress();
+                return;
+            }
             
-            if (reviews && reviews.length > 0) {
-                const lastReviewDate = new Date(reviews[0].WriteDate);
-                
-                // Get progress snapshot closest to last review
-                const progressHistory = await ProgressModel.getByStudentIdAndDateRange(
+            // Get ProgressDate of latest record
+            const latestDate = new Date(this.latestProgress.ProgressDate);
+            
+            // Calculate 1 week before
+            const oneWeekBefore = new Date(latestDate);
+            oneWeekBefore.setDate(oneWeekBefore.getDate() - 7);
+            
+            // Find progress closest to 1 week before latest ProgressDate
+            this.previousProgress = await ProgressModel.getProgressByDate(
+                this.studentId, 
+                oneWeekBefore.toISOString().split('T')[0]
+            );
+            
+            // If no exact match, find the closest one before that date
+            if (!this.previousProgress) {
+                this.previousProgress = await ProgressModel.getClosestProgressBeforeDate(
                     this.studentId,
-                    new Date(lastReviewDate.getTime() - 24 * 60 * 60 * 1000).toISOString(), // 1 day before
-                    lastReviewDate.toISOString()
+                    oneWeekBefore.toISOString().split('T')[0]
                 );
-                
-                this.previousProgress = progressHistory && progressHistory.length > 0 ? progressHistory[0] : null;
             }
             
             this.renderProgress();
@@ -89,11 +99,23 @@ class StudentDetailController {
     
     renderProgress() {
         const container = document.getElementById('modulesGrid');
+        const subtitle = document.querySelector('.section-subtitle');
+        
         if (!container) return;
         
         if (!this.latestProgress) {
             container.innerHTML = '<p style="color: #999;">Progress məlumatı tapılmadı</p>';
             return;
+        }
+        
+        // Update subtitle with dates
+        if (subtitle && this.latestProgress.ProgressDate) {
+            const latestDate = new Date(this.latestProgress.ProgressDate).toLocaleDateString('az-AZ');
+            const previousDate = this.previousProgress && this.previousProgress.ProgressDate
+                ? new Date(this.previousProgress.ProgressDate).toLocaleDateString('az-AZ')
+                : 'başlanğıc';
+            
+            subtitle.textContent = `Progress müqayisəsi: ${previousDate} → ${latestDate}`;
         }
         
         const differences = this.previousProgress 
@@ -109,6 +131,18 @@ class StudentDetailController {
                 const diff = differences[module];
                 const progressPercent = Math.min(Math.max(progress, 0), 100);
                 
+                // Get previous percent - treat NULL as 0 if we're comparing
+                let previousPercent = null;
+                if (this.previousProgress) {
+                    const prevValue = this.previousProgress[module];
+                    if (prevValue !== null && prevValue !== undefined) {
+                        previousPercent = Math.min(Math.max(prevValue, 0), 100);
+                    } else if (diff) {
+                        // If there's a diff shown, previous was 0 (NULL treated as starting point)
+                        previousPercent = 0;
+                    }
+                }
+                
                 html += `
                     <div class="module-card ${diff ? 'has-change' : ''}">
                         <div class="module-name">${module}</div>
@@ -116,9 +150,12 @@ class StudentDetailController {
                             <div class="progress-fill" style="width: ${progressPercent}%"></div>
                         </div>
                         <div class="progress-text">${progressPercent}%</div>
-                        ${diff ? `
-                            <div class="progress-change ${diff.difference > 0 ? 'positive' : 'negative'}">
-                                ${diff.difference > 0 ? '+' : ''}${diff.difference}% son reviewdan bəri
+                        ${diff && diff.difference > 0 ? `
+                            <div class="progress-change positive">
+                                ${previousPercent !== null ? `${previousPercent}% → ${progressPercent}%` : `${progressPercent}%`}
+                                <span style="font-weight: bold; margin-left: 0.5rem;">
+                                    (+${diff.difference}%)
+                                </span>
                             </div>
                         ` : ''}
                     </div>
