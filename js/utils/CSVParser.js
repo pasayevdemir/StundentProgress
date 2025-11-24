@@ -4,11 +4,15 @@ class CSVParser {
         const lines = csvText.split('\n').filter(line => line.trim());
         if (lines.length < 2) throw new Error('CSV faylı boşdur və ya yanlış formatdadır');
         
-        const headers = lines[0].split('\t').map(h => h.trim());
+        // Detect delimiter (comma or tab)
+        const firstLine = lines[0];
+        const delimiter = firstLine.includes('\t') ? '\t' : ',';
+        
+        const headers = firstLine.split(delimiter).map(h => h.trim());
         const rows = [];
         
         for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split('\t');
+            const values = lines[i].split(delimiter);
             const row = {};
             
             headers.forEach((header, index) => {

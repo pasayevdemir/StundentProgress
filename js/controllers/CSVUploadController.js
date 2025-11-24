@@ -20,7 +20,7 @@ class CSVUploadController {
             
             for (let i = 0; i < rows.length; i++) {
                 const row = rows[i];
-                const validation = CSVParser.validateRow(row);
+                const validation = CSVParser.validateRow(row, i + 1);
                 
                 if (!validation.valid) {
                     this.uploadResults.failed++;
