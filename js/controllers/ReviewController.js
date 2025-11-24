@@ -34,7 +34,8 @@ class ReviewController {
     
     async loadStudents() {
         try {
-            this.students = await StudentModel.getAll(true);
+            // Show all students (including inactive ones)
+            this.students = await StudentModel.getAll(false);
             
             // Get latest progress for each student
             const studentsWithProgress = await Promise.all(

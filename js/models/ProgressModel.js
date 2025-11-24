@@ -77,6 +77,36 @@ class ProgressModel {
         }
     }
     
+    static async upsertByDate(studentId, progressDate, progressData) {
+        // Check if progress exists for this student on this specific date
+        const { data: existing, error: selectError } = await supabaseClient
+            .from('Progresses')
+            .select('*')
+            .eq('StudentID', studentId)
+            .eq('ProgressDate', progressDate)
+            .limit(1);
+        
+        if (selectError) throw selectError;
+        
+        if (existing && existing.length > 0) {
+            // Update existing progress
+            const { data, error } = await supabaseClient
+                .from('Progresses')
+                .update(progressData)
+                .eq('ID', existing[0].ID)
+                .select();
+            
+            if (error) throw error;
+            return data;
+        } else {
+            // Create new progress
+            return await this.create({
+                StudentID: studentId,
+                ...progressData
+            });
+        }
+    }
+    
     static calculateDifference(currentProgress, previousProgress) {
         if (!previousProgress) return null;
         
