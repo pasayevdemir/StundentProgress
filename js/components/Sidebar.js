@@ -3,11 +3,19 @@ class Sidebar {
     constructor() {
         this.isOpen = false;
         this.currentPath = window.location.pathname;
+        this.isDesktop = window.innerWidth > 1024;
+        this.isDarkMode = localStorage.getItem('darkMode') === 'true';
     }
 
     init() {
         this.render();
         this.setupEventListeners();
+        this.applyTheme();
+        
+        // Open sidebar by default on desktop
+        if (this.isDesktop) {
+            this.openDesktop();
+        }
     }
 
     getBasePath() {
@@ -57,6 +65,8 @@ class Sidebar {
 
     render() {
         const basePath = this.getBasePath();
+        const themeIcon = this.isDarkMode ? '☀️' : '🌙';
+        const themeLabel = this.isDarkMode ? 'Açıq Tema' : 'Qaranlıq Tema';
         
         // Create sidebar HTML
         const sidebarHTML = `
@@ -89,6 +99,13 @@ class Sidebar {
                             <span class="sidebar-label">${item.label}</span>
                         </a>
                     `).join('')}
+                    
+                    <div class="sidebar-divider"></div>
+                    
+                    <button class="sidebar-item theme-toggle" id="themeToggle">
+                        <span class="sidebar-icon" id="themeIcon">${themeIcon}</span>
+                        <span class="sidebar-label" id="themeLabel">${themeLabel}</span>
+                    </button>
                 </div>
 
                 <div class="sidebar-footer">
@@ -98,7 +115,7 @@ class Sidebar {
                             <span class="user-name" id="sidebarUserName">Yüklənir...</span>
                         </div>
                         <button class="sidebar-logout-btn" onclick="sidebar.logout()" title="Çıxış">
-                            🚪 Çıxış
+                            🚪
                         </button>
                     </div>
                 </div>
@@ -113,6 +130,7 @@ class Sidebar {
         const hamburgerBtn = document.getElementById('hamburgerBtn');
         const sidebarClose = document.getElementById('sidebarClose');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const themeToggle = document.getElementById('themeToggle');
 
         if (hamburgerBtn) {
             hamburgerBtn.addEventListener('click', () => this.toggle());
@@ -125,10 +143,26 @@ class Sidebar {
         if (sidebarOverlay) {
             sidebarOverlay.addEventListener('click', () => this.close());
         }
+        
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => this.toggleTheme());
+        }
 
         // Close on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.isOpen) {
+                this.close();
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const wasDesktop = this.isDesktop;
+            this.isDesktop = window.innerWidth > 1024;
+            
+            if (this.isDesktop && !wasDesktop) {
+                this.openDesktop();
+            } else if (!this.isDesktop && wasDesktop) {
                 this.close();
             }
         });
@@ -138,7 +172,11 @@ class Sidebar {
     }
 
     toggle() {
-        this.isOpen ? this.close() : this.open();
+        if (this.isDesktop) {
+            this.isOpen ? this.closeDesktop() : this.openDesktop();
+        } else {
+            this.isOpen ? this.close() : this.open();
+        }
     }
 
     open() {
@@ -152,9 +190,50 @@ class Sidebar {
     close() {
         this.isOpen = false;
         document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebar').classList.remove('desktop-open');
         document.getElementById('sidebarOverlay').classList.remove('active');
         document.getElementById('hamburgerBtn').classList.remove('active');
         document.body.style.overflow = '';
+        document.body.classList.remove('sidebar-expanded');
+    }
+    
+    openDesktop() {
+        this.isOpen = true;
+        document.getElementById('sidebar').classList.add('desktop-open');
+        document.getElementById('hamburgerBtn').classList.add('active');
+        document.body.classList.add('sidebar-expanded');
+    }
+    
+    closeDesktop() {
+        this.isOpen = false;
+        document.getElementById('sidebar').classList.remove('desktop-open');
+        document.getElementById('hamburgerBtn').classList.remove('active');
+        document.body.classList.remove('sidebar-expanded');
+    }
+    
+    toggleTheme() {
+        this.isDarkMode = !this.isDarkMode;
+        localStorage.setItem('darkMode', this.isDarkMode);
+        this.applyTheme();
+        this.updateThemeButton();
+    }
+    
+    applyTheme() {
+        if (this.isDarkMode) {
+            document.body.classList.add('dark-theme');
+        } else {
+            document.body.classList.remove('dark-theme');
+        }
+    }
+    
+    updateThemeButton() {
+        const themeIcon = document.getElementById('themeIcon');
+        const themeLabel = document.getElementById('themeLabel');
+        
+        if (themeIcon && themeLabel) {
+            themeIcon.textContent = this.isDarkMode ? '☀️' : '🌙';
+            themeLabel.textContent = this.isDarkMode ? 'Açıq Tema' : 'Qaranlıq Tema';
+        }
     }
 
     async loadUserInfo() {

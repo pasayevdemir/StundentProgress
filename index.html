@@ -4,8 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PeerStack - Yönləndirmə</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            color: #1f2937;
+        }
+        body.dark-theme {
+            background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+            color: #e2e8f0;
+        }
+    </style>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="js/config.js"></script>
+</head>
+<body>
+    <script>
+        // Apply saved theme immediately
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
+    <p style="text-align: center;">Yönləndirilirsiniz...</p>
     <script>
         // Check authentication and redirect accordingly
         supabaseClient.auth.getSession().then(({ data: { session } }) => {
@@ -16,8 +41,5 @@
             }
         });
     </script>
-</head>
-<body>
-    <p style="text-align: center; margin-top: 50px;">Yönləndirilirsiniz...</p>
 </body>
 </html>

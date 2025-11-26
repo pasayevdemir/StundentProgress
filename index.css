@@ -136,6 +136,58 @@ button:active {
     }
 }
 
+/* ====================== */
+/* DARK THEME */
+/* ====================== */
+body.dark-theme {
+    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+    color: #e2e8f0;
+}
+
+body.dark-theme .login-container {
+    background: #1e293b;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme h2 {
+    color: #f1f5f9;
+}
+
+body.dark-theme label {
+    color: #94a3b8;
+}
+
+body.dark-theme input {
+    background-color: #334155;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-theme input:focus {
+    border-color: #6366f1;
+    background-color: #1e293b;
+}
+
+body.dark-theme button {
+    background-color: #6366f1;
+}
+
+body.dark-theme button:hover {
+    background-color: #4f46e5;
+}
+
+body.dark-theme .alert-message.error {
+    background-color: #7f1d1d;
+    color: #fca5a5;
+    border-color: #991b1b;
+}
+
+body.dark-theme .alert-message.success {
+    background-color: #064e3b;
+    color: #6ee7b7;
+    border-color: #059669;
+}
+
 
 
 

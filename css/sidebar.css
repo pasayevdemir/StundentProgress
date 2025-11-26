@@ -83,7 +83,8 @@
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
 }
 
-.sidebar.open {
+.sidebar.open,
+.sidebar.desktop-open {
     transform: translateX(0);
 }
 
@@ -150,6 +151,12 @@
     margin-bottom: 0.25rem;
     transition: all 0.2s;
     font-weight: 500;
+    border: none;
+    background: transparent;
+    width: 100%;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
 }
 
 .sidebar-item:hover {
@@ -171,6 +178,16 @@
 .sidebar-item.disabled:hover {
     background: transparent;
     color: rgba(255, 255, 255, 0.8);
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 1rem 0;
+}
+
+.theme-toggle {
+    margin-top: 0.5rem;
 }
 
 .sidebar-icon {
@@ -225,7 +242,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 90px;
+    width: 36px;
     height: 36px;
     background: rgba(239, 68, 68, 0.2);
     border: none;
@@ -245,7 +262,7 @@
 /* Page Layout Adjustment for sidebar trigger */
 .page-wrapper {
     padding-left: 0;
-    transition: padding-left 0.3s ease;
+    transition: padding-left 0.3s ease, margin-left 0.3s ease;
 }
 
 /* Adjust container for hamburger button space */
@@ -257,8 +274,27 @@
     padding-left: 3.5rem;
 }
 
+/* Desktop sidebar open - push content */
+@media (min-width: 1025px) {
+    body.sidebar-expanded .page-wrapper {
+        margin-left: 280px;
+    }
+    
+    body.sidebar-expanded .hamburger-btn {
+        left: 296px;
+    }
+    
+    .sidebar.desktop-open + .sidebar-overlay {
+        display: none;
+    }
+    
+    .sidebar-close {
+        display: none;
+    }
+}
+
 /* Mobile Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .sidebar {
         width: 100%;
         max-width: 300px;
@@ -274,4 +310,28 @@
     .header {
         padding-left: 3rem;
     }
+}
+
+/* ====================== */
+/* DARK THEME - SIDEBAR ONLY */
+/* ====================== */
+
+/* CSS Variables for dark theme */
+body.dark-theme {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-color: #e2e8f0;
+    --border-color: #334155;
+    --primary-color: #6366f1;
+    --primary-hover: #4f46e5;
+}
+
+/* Hamburger button dark theme */
+body.dark-theme .hamburger-btn {
+    background: #6366f1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .hamburger-btn:hover {
+    background: #4f46e5;
 }

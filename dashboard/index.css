@@ -742,3 +742,198 @@ body {
         font-size: 1.1rem;
     }
 }
+
+/* ====================== */
+/* DARK THEME */
+/* ====================== */
+body.dark-theme {
+    background-color: #0f172a;
+    color: #e2e8f0;
+}
+
+body.dark-theme .header h1 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .header-subtitle {
+    color: #94a3b8;
+}
+
+/* Dark theme stat cards */
+body.dark-theme .stat-card {
+    background: #1e293b;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .stat-info h3 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .stat-info p {
+    color: #94a3b8;
+}
+
+/* Dark theme pending alert */
+body.dark-theme .pending-alert-card {
+    background: linear-gradient(135deg, #422006 0%, #78350f 100%);
+    border-color: #a16207;
+}
+
+body.dark-theme .pending-alert-center h3 {
+    color: #fef3c7;
+}
+
+body.dark-theme .pending-alert-center p {
+    color: #fde68a;
+}
+
+body.dark-theme .pending-alert-center strong {
+    color: #fef3c7;
+}
+
+body.dark-theme .alert.warning {
+    background: linear-gradient(135deg, #422006, #78350f);
+    border-color: #a16207;
+    color: #fde68a;
+}
+
+body.dark-theme .alert-content strong {
+    color: #fef3c7;
+}
+
+/* Dark theme sections */
+body.dark-theme .section {
+    background: #1e293b;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .section-header {
+    border-bottom-color: #334155;
+}
+
+body.dark-theme .section-header h2 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .section-subtitle {
+    color: #94a3b8;
+}
+
+/* Dark theme tables */
+body.dark-theme .data-table th {
+    background: #334155;
+    color: #e2e8f0;
+    border-bottom-color: #475569;
+}
+
+body.dark-theme .data-table td {
+    border-bottom-color: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-theme .data-table tbody tr:hover {
+    background: #334155;
+}
+
+/* Dark theme badges */
+body.dark-theme .badge.primary {
+    background: #312e81;
+    color: #a5b4fc;
+}
+
+body.dark-theme .badge.success {
+    background: #064e3b;
+    color: #6ee7b7;
+}
+
+body.dark-theme .badge.muted {
+    background: #334155;
+    color: #94a3b8;
+}
+
+body.dark-theme .rank-badge.rank-other {
+    background: #334155;
+    color: #94a3b8;
+}
+
+body.dark-theme .date-text {
+    color: #94a3b8;
+}
+
+/* Dark theme recent reviews */
+body.dark-theme .recent-review-card {
+    background: #334155;
+    border-color: #475569;
+}
+
+body.dark-theme .recent-review-card:hover {
+    border-color: #6366f1;
+}
+
+body.dark-theme .reviewer-name {
+    color: #a5b4fc;
+}
+
+body.dark-theme .review-arrow {
+    color: #64748b;
+}
+
+body.dark-theme .student-name {
+    color: #e2e8f0;
+}
+
+body.dark-theme .review-date {
+    color: #64748b;
+}
+
+/* Dark theme tabs */
+body.dark-theme .tab-filters {
+    background: #334155;
+}
+
+body.dark-theme .tab-btn {
+    color: #94a3b8;
+}
+
+body.dark-theme .tab-btn:hover {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+body.dark-theme .tab-btn.active {
+    background: #1e293b;
+    border-color: #6366f1;
+    color: #a5b4fc;
+}
+
+body.dark-theme .tab-count {
+    background: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-theme .tab-btn.active .tab-count {
+    background: #6366f1;
+    color: white;
+}
+
+/* Dark theme leaderboard */
+body.dark-theme .leaderboard-row:hover {
+    background: #334155;
+}
+
+body.dark-theme .student-email {
+    color: #64748b;
+}
+
+body.dark-theme .cohort-badge {
+    background: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-theme .progress-bar-mini {
+    background: #334155;
+}
+
+body.dark-theme .progress-percent {
+    color: #e2e8f0;
+}

@@ -7,6 +7,12 @@
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
+    <script>
+        // Apply saved theme immediately
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
     <div class="login-container">
         <div class="login-logo">
             <span class="logo-icon">🎓</span>

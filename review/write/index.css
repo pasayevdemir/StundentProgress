@@ -449,3 +449,200 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* ====================== */
+/* DARK THEME */
+/* ====================== */
+body.dark-theme {
+    background-color: #0f172a;
+    color: #e2e8f0;
+}
+
+body.dark-theme .container {
+    background: #1e293b;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .header h1 {
+    color: #f1f5f9;
+}
+
+body.dark-theme .header {
+    border-bottom-color: #334155;
+}
+
+/* Dark theme section headers */
+body.dark-theme .modules-section h3,
+body.dark-theme .previous-reviews-section h3,
+body.dark-theme .review-form-section h3 {
+    color: #f1f5f9;
+    border-bottom-color: #6366f1;
+}
+
+/* Dark theme back button */
+body.dark-theme .back-btn {
+    background: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-theme .back-btn:hover {
+    background: #475569;
+    color: #f1f5f9;
+}
+
+/* Dark theme student info */
+body.dark-theme .student-info-container {
+    background: linear-gradient(135deg, #312e81 0%, #4338ca 100%);
+}
+
+body.dark-theme .student-header h2 {
+    color: #ffffff;
+}
+
+body.dark-theme .student-details {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+body.dark-theme .student-details p {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+body.dark-theme .student-details strong {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Dark theme module cards */
+body.dark-theme .modules-section {
+    background: transparent;
+}
+
+body.dark-theme .section-subtitle {
+    color: #94a3b8;
+}
+
+body.dark-theme .module-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-theme .module-card:hover {
+    border-color: #6366f1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .module-card.has-change {
+    border-left-color: #fbbf24;
+    background: linear-gradient(to right, #422006 0%, #1e293b 100%);
+}
+
+body.dark-theme .module-name {
+    color: #e2e8f0;
+}
+
+body.dark-theme .module-description {
+    color: #94a3b8;
+}
+
+body.dark-theme .progress-bar {
+    background: #334155;
+}
+
+body.dark-theme .progress-text {
+    color: #94a3b8;
+}
+
+/* Dark theme progress change indicators */
+body.dark-theme .progress-change {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .progress-change.positive {
+    color: #6ee7b7;
+    background: #064e3b;
+}
+
+body.dark-theme .progress-change.negative {
+    color: #fca5a5;
+    background: #7f1d1d;
+}
+
+body.dark-theme .progress-change.no-change {
+    color: #94a3b8;
+    background: #334155;
+}
+
+/* Dark theme previous reviews */
+body.dark-theme .review-card {
+    background: #1e293b;
+    border-color: #334155;
+    border-left-color: #6366f1;
+}
+
+body.dark-theme .review-date {
+    color: #94a3b8;
+}
+
+body.dark-theme .review-reviewer {
+    color: #a5b4fc;
+    border-bottom-color: #334155;
+}
+
+body.dark-theme .review-label {
+    color: #e2e8f0;
+}
+
+body.dark-theme .review-text {
+    color: #cbd5e1;
+    background: #334155;
+}
+
+/* Dark theme form */
+body.dark-theme .review-form-section {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-theme .form-group label {
+    color: #e2e8f0;
+}
+
+body.dark-theme .form-group textarea {
+    background-color: #334155;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-theme .form-group textarea:focus {
+    border-color: #6366f1;
+    background-color: #1e293b;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+body.dark-theme .form-group textarea::placeholder {
+    color: #64748b;
+}
+
+body.dark-theme .cancel-btn {
+    background-color: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-theme .cancel-btn:hover {
+    background-color: #475569;
+    color: #f1f5f9;
+}
+
+body.dark-theme .submit-btn {
+    background-color: #6366f1;
+}
+
+body.dark-theme .submit-btn:hover {
+    background-color: #4f46e5;
+}
+
+/* Dark theme notification */
+body.dark-theme .notification-content {
+    background: #059669;
+}

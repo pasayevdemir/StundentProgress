@@ -90,6 +90,9 @@
     <script src="../../js/controllers/StudentDetailController.js"></script>
     <script src="../../js/components/Sidebar.js"></script>
     <script>
+        // Global variable to be initialized when DOM is ready
+        let studentDetailController = null;
+        
         // Get student ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const studentId = parseInt(urlParams.get('id'));
@@ -99,10 +102,10 @@
             window.location.href = '../';
         }
         
-        // Initialize controller
-        const studentDetailController = new StudentDetailController(studentId);
-        
+        // Initialize on page load (sidebar auto-initializes via Sidebar.js)
         document.addEventListener('DOMContentLoaded', () => {
+            // Initialize controller
+            studentDetailController = new StudentDetailController(studentId);
             studentDetailController.init();
         });
     </script>
