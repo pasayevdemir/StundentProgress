@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ana Səhifə - PeerStack</title>
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="container">
+            <div class="header">
+                <h1>📊 Ana Səhifə</h1>
+                <p class="header-subtitle">Qiymətləndirmə statistikası və ümumi baxış</p>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-info">
+                        <h3 id="todayReviews">-</h3>
+                        <p>Bugünkü Qiymətləndirmələr</p>
+                    </div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-info">
+                        <h3 id="weekReviews">-</h3>
+                        <p>Bu Həftə</p>
+                    </div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon">📆</div>
+                    <div class="stat-info">
+                        <h3 id="monthReviews">-</h3>
+                        <p>Bu Ay</p>
+                    </div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-info">
+                        <h3 id="totalReviews">-</h3>
+                        <p>Ümumi Qiymətləndirmə</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Reviews Alert -->
+            <div class="pending-alert-card" id="pendingAlert" style="display: none;">
+                <div class="pending-alert-center">
+                    <h3>Gözləyən Qiymətləndirmələr</h3>
+                    <p><strong id="pendingCount">0</strong> tələbə hələ bugün qiymətləndirilməyib</p>
+                </div>
+                <div class="pending-alert-right">
+                    <a href="../review/" class="pending-alert-btn">Qiymətləndirməyə keç</a>
+                </div>
+            </div>
+
+            <!-- Reviewers Table -->
+            <div class="section">
+                <div class="section-header">
+                    <h2>👥 Qiymətləndirənlər</h2>
+                    <p class="section-subtitle">Reviewer statistikası</p>
+                </div>
+                <div class="table-container">
+                    <table class="data-table" id="reviewersTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Ad Soyad</th>
+                                <th>Bugün</th>
+                                <th>Ümumi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reviewersTableBody">
+                            <tr><td colspan="4" style="text-align: center;">Yüklənir...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Reviews -->
+            <div class="section">
+                <div class="section-header">
+                    <h2>🕐 Son Qiymətləndirmələr</h2>
+                    <p class="section-subtitle">Ən son edilən qiymətləndirmələr</p>
+                </div>
+                <div class="recent-reviews-list" id="recentReviewsList">
+                    <p style="text-align: center; color: #6b7280;">Yüklənir...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div id="notificationPopup" class="notification-popup hidden">
+        <div class="notification-content">
+            <div class="notification-icon">✓</div>
+            <p id="notificationMessage"></p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/utils/UIHelper.js"></script>
+    <script src="../js/models/StudentModel.js"></script>
+    <script src="../js/models/ReviewModel.js"></script>
+    <script src="../js/models/ReviewerModel.js"></script>
+    <script src="../js/components/Sidebar.js"></script>
+    <script src="dashboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dashboard = new DashboardController();
+            dashboard.init();
+        });
+    </script>
+</body>
+</html>

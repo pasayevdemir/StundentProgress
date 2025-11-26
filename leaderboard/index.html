@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liderlik Cədvəli - PeerStack</title>
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="container">
+            <div class="header">
+                <h1>🏆 Tələbə Liderlik Cədvəli</h1>
+                <p class="header-subtitle">Tələbələrin modul progress ortalamasına görə sıralanması</p>
+            </div>
+
+            <!-- How it works info -->
+            <div class="info-card">
+                <div class="info-icon">ℹ️</div>
+                <div class="info-content">
+                    <strong>Ortalama necə hesablanır?</strong>
+                    <p>Hər tələbənin bütün modullardakı (Onboarding, Season 01, Season 02, və s.) progress faizləri toplanır və modul sayına bölünür. Məsələn: 3 modulda 80%, 60%, 40% progress varsa, ortalama (80+60+40)/3 = 60% olur.</p>
+                </div>
+            </div>
+
+            <!-- Stats Summary -->
+            <div class="stats-summary">
+                <div class="summary-item better">
+                    <span class="summary-icon">🌟</span>
+                    <span class="summary-count" id="countBetterStat">0</span>
+                    <span class="summary-label">Əla (120%+)</span>
+                </div>
+                <div class="summary-item good">
+                    <span class="summary-icon">👍</span>
+                    <span class="summary-count" id="countGoodStat">0</span>
+                    <span class="summary-label">Yaxşı (90-119%)</span>
+                </div>
+                <div class="summary-item normal">
+                    <span class="summary-icon">📊</span>
+                    <span class="summary-count" id="countNormalStat">0</span>
+                    <span class="summary-label">Normal (70-89%)</span>
+                </div>
+                <div class="summary-item weak">
+                    <span class="summary-icon">⚠️</span>
+                    <span class="summary-count" id="countWeakStat">0</span>
+                    <span class="summary-label">Zəif (50-69%)</span>
+                </div>
+                <div class="summary-item very-weak">
+                    <span class="summary-icon">🔴</span>
+                    <span class="summary-count" id="countVeryWeakStat">0</span>
+                    <span class="summary-label">Çox Zəif (&lt;50%)</span>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="info-box">
+                <div class="info-icon">ℹ️</div>
+                <div class="info-content">
+                    <strong>Performans Hesablanması:</strong> Tələbələr proqramda keçirdikləri vaxta görə qiymətləndirilir. 
+                    Hər ay üçün təxminən 1 modul bitirmək gözlənilir. Performans = (Faktiki progress / Gözlənilən progress) × 100%.
+                    <br><em>Misal: 2 aydır proqramda olan və hələ Preseason-da qalan tələbə zəif qiymətləndirilir.</em>
+                </div>
+            </div>
+
+            <!-- Tab Filters -->
+            <div class="section">
+                <div class="tab-filters">
+                    <button class="tab-btn active" data-filter="all">
+                        <span class="tab-icon">📋</span>
+                        Hamısı
+                        <span class="tab-count" id="countAll">0</span>
+                    </button>
+                    <button class="tab-btn" data-filter="better">
+                        <span class="tab-icon">🌟</span>
+                        Əla
+                        <span class="tab-count" id="countBetter">0</span>
+                    </button>
+                    <button class="tab-btn" data-filter="good">
+                        <span class="tab-icon">👍</span>
+                        Yaxşı
+                        <span class="tab-count" id="countGood">0</span>
+                    </button>
+                    <button class="tab-btn" data-filter="normal">
+                        <span class="tab-icon">📊</span>
+                        Normal
+                        <span class="tab-count" id="countNormal">0</span>
+                    </button>
+                    <button class="tab-btn" data-filter="weak">
+                        <span class="tab-icon">⚠️</span>
+                        Zəif
+                        <span class="tab-count" id="countWeak">0</span>
+                    </button>
+                    <button class="tab-btn" data-filter="very-weak">
+                        <span class="tab-icon">🔴</span>
+                        Çox Zəif
+                        <span class="tab-count" id="countVeryWeak">0</span>
+                    </button>
+                </div>
+
+                <!-- Leaderboard Table -->
+                <div class="table-container">
+                    <table class="data-table" id="leaderboardTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Tələbə</th>
+                                <th>Cohort</th>
+                                <th>Proqramda Vaxt</th>
+                                <th>Bitirdiyi Modullar</th>
+                                <th>Performans</th>
+                                <th>Səviyyə</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboardTableBody">
+                            <tr><td colspan="7" style="text-align: center;">Yüklənir...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div id="notificationPopup" class="notification-popup hidden">
+        <div class="notification-content">
+            <div class="notification-icon">✓</div>
+            <p id="notificationMessage"></p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/utils/UIHelper.js"></script>
+    <script src="../js/models/StudentModel.js"></script>
+    <script src="../js/models/ProgressModel.js"></script>
+    <script src="../js/components/Sidebar.js"></script>
+    <script src="leaderboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const leaderboard = new LeaderboardController();
+            leaderboard.init();
+        });
+    </script>
+</body>
+</html>

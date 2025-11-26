@@ -4,6 +4,9 @@ class ReviewController {
         this.currentUser = null;
         this.reviewerId = null;
         this.students = [];
+        this.allStudents = [];
+        this.studentsWithoutReview = [];
+        this.showAll = false;
     }
     
     async init() {
@@ -17,7 +20,7 @@ class ReviewController {
         const { data: { session } } = await supabaseClient.auth.getSession();
         
         if (!session) {
-            window.location.href = 'login.html';
+            window.location.href = '../login/';
             return;
         }
         
@@ -34,23 +37,70 @@ class ReviewController {
     
     async loadStudents() {
         try {
-            // Show all students (including inactive ones)
-            this.students = await StudentModel.getAll(false);
+            // Get all active students
+            const allStudents = await StudentModel.getAll();
             
-            // Get latest progress for each student
-            const studentsWithProgress = await Promise.all(
-                this.students.map(async (student) => {
+            // Get today's reviews to filter out students who already have reviews
+            const todayReviews = await ReviewModel.getTodayReviews();
+            const reviewedStudentIds = new Set(todayReviews.map(r => r.StudentID));
+            
+            // Get latest progress for all students
+            this.allStudents = await Promise.all(
+                allStudents.map(async (student) => {
                     const progress = await ProgressModel.getLatestByStudentId(student.ID);
-                    return { ...student, latestProgress: progress };
+                    const hasReviewToday = reviewedStudentIds.has(student.ID);
+                    return { ...student, latestProgress: progress, hasReviewToday };
                 })
             );
             
-            this.renderStudentsTable(studentsWithProgress);
-            this.updateSearchResults(studentsWithProgress);
+            // Filter students who don't have a review for today
+            this.studentsWithoutReview = this.allStudents.filter(
+                student => !student.hasReviewToday
+            );
+            
+            // Show students without review by default
+            this.displayStudents();
             
         } catch (error) {
             console.error('Tələbələr yüklənə bilmədi:', error);
             UIHelper.showNotification('Tələbələr yüklənə bilmədi', 'error');
+        }
+    }
+    
+    displayStudents() {
+        const studentsToShow = this.showAll ? this.allStudents : this.studentsWithoutReview;
+        this.students = studentsToShow;
+        this.renderStudentsTable(studentsToShow);
+        this.updateSearchResults(studentsToShow);
+        this.updateToggleButton();
+    }
+    
+    toggleView() {
+        this.showAll = !this.showAll;
+        this.displayStudents();
+    }
+    
+    updateToggleButton() {
+        const toggleBtn = document.getElementById('toggleViewBtn');
+        const tableTitle = document.getElementById('tableTitle');
+        
+        if (toggleBtn) {
+            if (this.showAll) {
+                toggleBtn.textContent = '📋 Qiymətləndirilməmişlər';
+                toggleBtn.title = 'Bugün qiymətləndirilməmiş tələbələri göstər';
+            } else {
+                toggleBtn.textContent = '👥 Bütün Tələbələr';
+                toggleBtn.title = 'Bütün tələbələri göstər';
+            }
+        }
+        
+        if (tableTitle) {
+            const count = this.showAll ? this.allStudents.length : this.studentsWithoutReview.length;
+            if (this.showAll) {
+                tableTitle.textContent = `Bütün Tələbələr (${count})`;
+            } else {
+                tableTitle.textContent = `Bugün Qiymətləndirilməmiş Tələbələr (${count})`;
+            }
         }
     }
     
@@ -65,14 +115,17 @@ class ReviewController {
         
         tbody.innerHTML = students.map(student => {
             const moduleCount = this.countCompletedModules(student.latestProgress);
+            const reviewStatus = student.hasReviewToday 
+                ? '<span class="status reviewed">✓</span>' 
+                : '<span class="status pending">Gözləyir</span>';
             return `
                 <tr>
                     <td>${UIHelper.escapeHtml(student.FirstName + ' ' + student.LastName)}</td>
                     <td>${UIHelper.escapeHtml(student.Email)}</td>
                     <td>${UIHelper.escapeHtml(student.CohortName)}</td>
-                    <td><span class="status active">Aktiv</span></td>
+                    <td>${reviewStatus}</td>
                     <td class="modules-info">${moduleCount} aktiv modul</td>
-                    <td><button class="review-btn" onclick="reviewController.openStudentDetail(${student.ID})">Qiymətləndirmə</button></td>
+                    <td><button class="review-btn" onclick="reviewController.openStudentDetail(${student.ID})">Review</button></td>
                 </tr>
             `;
         }).join('');
@@ -126,11 +179,11 @@ class ReviewController {
     }
     
     openStudentDetail(studentId) {
-        window.location.href = `write_review.html?id=${studentId}`;
+        window.location.href = `write/?id=${studentId}`;
     }
     
     async logout() {
         await supabaseClient.auth.signOut();
-        window.location.href = 'login.html';
+        window.location.href = '../login/';
     }
 }

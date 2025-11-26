@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş - PeerStack</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-logo">
+            <span class="logo-icon">🎓</span>
+            <h1>PeerStack</h1>
+        </div>
+        <h2>Giriş Yap</h2>
+        
+        <!-- Alert Message -->
+        <div id="alertMessage" class="alert-message hidden">
+            <span id="alertText"></span>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Email adresinizi girin" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Şifrə</label>
+                <input type="password" id="password" name="password" placeholder="Şifrənizi girin" required>
+            </div>
+            <button type="submit">Giriş</button>
+        </form>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const alertMessage = document.getElementById('alertMessage');
+            const alertText = document.getElementById('alertText');
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) throw error;
+                
+                // Redirect to dashboard
+                window.location.href = '../dashboard/';
+                
+            } catch (error) {
+                alertMessage.classList.remove('hidden');
+                alertMessage.classList.add('error');
+                alertText.textContent = error.message || 'Giriş uğursuz oldu';
+            }
+        });
+        
+        // Check if already logged in
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                window.location.href = '../dashboard/';
+            }
+        });
+    </script>
+</body>
+</html>

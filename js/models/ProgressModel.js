@@ -176,4 +176,171 @@ class ProgressModel {
         
         return differences;
     }
+    
+    // Modules to exclude from leaderboard calculations (no tasks, reading only)
+    static EXCLUDED_MODULES = ['Onboarding'];
+    
+    // Get modules that count for leaderboard
+    static getLeaderboardModules() {
+        return MODULE_COLUMNS.filter(module => !this.EXCLUDED_MODULES.includes(module));
+    }
+    
+    // Calculate total progress across all modules (cumulative completion)
+    // Excludes Onboarding as it has no tasks
+    static calculateTotalProgress(progress) {
+        if (!progress) return { totalProgress: 0, moduleCount: 0, completedModules: 0 };
+        
+        const leaderboardModules = this.getLeaderboardModules();
+        let totalProgress = 0;
+        let moduleCount = 0;
+        let completedModules = 0;
+        
+        leaderboardModules.forEach(module => {
+            const value = progress[module];
+            if (value !== null && value !== undefined) {
+                totalProgress += value;
+                moduleCount++;
+                if (value >= 100) {
+                    completedModules++;
+                }
+            }
+        });
+        
+        return {
+            totalProgress: totalProgress,
+            moduleCount: moduleCount,
+            completedModules: completedModules,
+            // Total possible is leaderboardModules * 100 (excluding Onboarding)
+            maxPossible: leaderboardModules.length * 100,
+            totalModules: leaderboardModules.length
+        };
+    }
+    
+    // Get the earliest progress date for a student (their start date)
+    static async getStudentStartDate(studentId) {
+        const { data, error } = await supabaseClient
+            .from('Progresses')
+            .select('ProgressDate, CreatedAt')
+            .eq('StudentID', studentId)
+            .order('ProgressDate', { ascending: true })
+            .limit(1)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        if (!data) return null;
+        
+        // Use ProgressDate if available, otherwise CreatedAt
+        return data.ProgressDate || data.CreatedAt;
+    }
+    
+    // Calculate months since student started
+    static calculateMonthsInProgram(startDate) {
+        if (!startDate) return 0;
+        
+        const start = new Date(startDate);
+        const now = new Date();
+        
+        const months = (now.getFullYear() - start.getFullYear()) * 12 + 
+                       (now.getMonth() - start.getMonth());
+        
+        // Add partial month based on days
+        const daysDiff = now.getDate() - start.getDate();
+        const partialMonth = daysDiff / 30;
+        
+        return Math.max(0, months + partialMonth);
+    }
+    
+    // Expected progress based on time in program
+    // Curriculum is roughly:
+    // Month 1-2: Onboarding + Preseason (2 modules) - ~10% of total
+    // Month 3-4: Season 01 (3 modules) - ~15% of total  
+    // Month 5-8: Season 02 (2 modules) - ~10% of total
+    // Month 9-14: Season 03 (13 modules) - ~60% of total
+    // Month 15+: Season 04 Masters - ~5% of total
+    // Total: 21 modules = 2100 points max
+    static calculateExpectedProgress(monthsInProgram) {
+        // Expected progress percentage based on months
+        // This is cumulative expected progress
+        if (monthsInProgram <= 0) return 0;
+        
+        // Define expected monthly progress rate
+        // Students should complete roughly 5-7% of total curriculum per month
+        // With 20 modules at 100 points each = 2000 total points (excluding Onboarding)
+        // Expected rate: ~100 points per month (about 1 module per month on average)
+        
+        const leaderboardModules = this.getLeaderboardModules();
+        const expectedMonthlyProgress = 100; // 100 points = 1 module per month
+        const maxProgress = leaderboardModules.length * 100; // 2000 (20 modules)
+        
+        const expectedProgress = monthsInProgram * expectedMonthlyProgress;
+        
+        // Cap at max possible
+        return Math.min(expectedProgress, maxProgress);
+    }
+    
+    // Calculate performance ratio: actual vs expected
+    static calculatePerformanceRatio(actualProgress, expectedProgress) {
+        if (expectedProgress <= 0) return 100; // New student, no expectations yet
+        
+        return (actualProgress / expectedProgress) * 100;
+    }
+    
+    // Get performance level based on actual vs expected progress ratio
+    static getPerformanceLevel(performanceRatio) {
+        if (performanceRatio >= 120) {
+            return { level: 'better', label: 'Əla', color: '#10b981', icon: '🌟' };
+        } else if (performanceRatio >= 90) {
+            return { level: 'good', label: 'Yaxşı', color: '#3b82f6', icon: '👍' };
+        } else if (performanceRatio >= 70) {
+            return { level: 'normal', label: 'Normal', color: '#f59e0b', icon: '📊' };
+        } else if (performanceRatio >= 50) {
+            return { level: 'weak', label: 'Zəif', color: '#f97316', icon: '⚠️' };
+        } else {
+            return { level: 'very-weak', label: 'Çox Zəif', color: '#ef4444', icon: '🔴' };
+        }
+    }
+    
+    // Get all students with their performance levels based on time-adjusted calculation
+    static async getAllStudentsWithPerformance() {
+        const students = await StudentModel.getAll();
+        
+        const studentsWithPerformance = await Promise.all(
+            students.map(async (student) => {
+                const progress = await this.getLatestByStudentId(student.ID);
+                const startDate = await this.getStudentStartDate(student.ID);
+                
+                // Calculate actual progress
+                const { totalProgress, moduleCount, completedModules, maxPossible } = 
+                    this.calculateTotalProgress(progress);
+                
+                // Calculate time in program
+                const monthsInProgram = this.calculateMonthsInProgram(startDate);
+                
+                // Calculate expected progress based on time
+                const expectedProgress = this.calculateExpectedProgress(monthsInProgram);
+                
+                // Calculate performance ratio
+                const performanceRatio = this.calculatePerformanceRatio(totalProgress, expectedProgress);
+                
+                // Get performance level
+                const performance = this.getPerformanceLevel(performanceRatio);
+                
+                return {
+                    ...student,
+                    progress,
+                    startDate: startDate,
+                    monthsInProgram: monthsInProgram,
+                    totalProgress: totalProgress,
+                    expectedProgress: expectedProgress,
+                    performanceRatio: performanceRatio,
+                    completedModules: completedModules,
+                    activeModuleCount: moduleCount,
+                    performance
+                };
+            })
+        );
+        
+        // Sort by performance ratio descending (best performers first)
+        return studentsWithPerformance.sort((a, b) => b.performanceRatio - a.performanceRatio);
+    }
 }

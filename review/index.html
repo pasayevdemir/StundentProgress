@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tələbə Qiymətləndirməsi - PeerStack</title>
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="container">
+            <div class="header">
+                <h1>Tələbə Qiymətləndirmə Sistemi</h1>
+                <div class="header-actions">
+                    <button class="upload-btn" onclick="document.getElementById('csvFileInput').click()">
+                        📤 CSV Yüklə
+                    </button>
+                    <input type="file" id="csvFileInput" accept=".csv,.txt" style="display: none;">
+                </div>
+            </div>
+
+            <!-- Axtarış Bölməsi -->
+            <div class="search-section">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="🔍 Tələbə adını axtarın..." autocomplete="off">
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+            </div>
+
+            <!-- Tələbələr Cədvəli -->
+            <div class="students-table-container">
+                <div class="table-header">
+                    <h2 id="tableTitle">Bugün Qiymətləndirilməmiş Tələbələr</h2>
+                    <button id="toggleViewBtn" class="toggle-btn" onclick="reviewController.toggleView()">
+                        👥 Bütün Tələbələr
+                    </button>
+                </div>
+                <table id="studentsTable" class="students-table">
+                    <thead>
+                        <tr>
+                            <th>Adı Soyadı</th>
+                            <th>Email</th>
+                            <th>Cohort</th>
+                            <th>Status</th>
+                            <th>Modullar</th>
+                            <th>Əməliyyat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <tr><td colspan="6" style="text-align: center;">Tələbələr yüklənir...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div id="notificationPopup" class="notification-popup hidden">
+        <div class="notification-content">
+            <div class="notification-icon">✓</div>
+            <p id="notificationMessage"></p>
+        </div>
+    </div>
+
+    <!-- Global Loader -->
+    <div id="globalLoader" class="global-loader" style="display: none;">
+        <div class="loader-spinner"></div>
+        <p>Yüklənir...</p>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/utils/UIHelper.js"></script>
+    <script src="../js/utils/CSVParser.js"></script>
+    <script src="../js/models/StudentModel.js"></script>
+    <script src="../js/models/ProgressModel.js"></script>
+    <script src="../js/models/ReviewModel.js"></script>
+    <script src="../js/models/ReviewerModel.js"></script>
+    <script src="../js/controllers/ReviewController.js"></script>
+    <script src="../js/controllers/CSVUploadController.js"></script>
+    <script src="../js/components/Sidebar.js"></script>
+    <script>
+        // Initialize controllers
+        const reviewController = new ReviewController();
+        const csvUploadController = new CSVUploadController();
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            reviewController.init();
+            
+            // CSV file input handler
+            document.getElementById('csvFileInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    csvUploadController.handleFileUpload(file);
+                    e.target.value = ''; // Reset input
+                }
+            });
+        });
+    </script>
+</body>
+</html>

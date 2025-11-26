@@ -3,11 +3,8 @@ class StudentModel {
     static async getAll(activeOnly = true) {
         const query = supabaseClient
             .from('Students')
-            .select('*');
-        
-        if (activeOnly) {
-            query.eq('Status', true);
-        }
+            .select('*')
+            .eq('Status', true);
         
         const { data, error } = await query;
         

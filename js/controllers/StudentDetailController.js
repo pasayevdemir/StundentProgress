@@ -22,7 +22,7 @@ class StudentDetailController {
         const { data: { session } } = await supabaseClient.auth.getSession();
         
         if (!session) {
-            window.location.href = 'login.html';
+            window.location.href = '../../login/';
             return;
         }
         
@@ -40,7 +40,7 @@ class StudentDetailController {
         } catch (error) {
             console.error('Tələbə məlumatı yüklənə bilmədi:', error);
             UIHelper.showNotification('Tələbə tapılmadı', 'error');
-            setTimeout(() => window.location.href = 'review.html', 1500);
+            setTimeout(() => window.location.href = '../', 1500);
         }
     }
     
@@ -245,6 +245,6 @@ class StudentDetailController {
     }
     
     goBack() {
-        window.location.href = 'review.html';
+        window.location.href = '../';
     }
 }
