@@ -46,26 +46,58 @@
 
             <!-- Qiymətləndirmə Formu -->
             <div class="review-form-section">
-                <h3>Yeni Qiymətləndirmə Yaz</h3>
+                <div class="form-header-row">
+                    <h3>Qiymətləndirmə Yaz</h3>
+                    <div class="ai-all-wrapper">
+                        <button type="button" class="ai-optimize-all-btn" id="optimizeAllBtn" title="Bütün sahələri AI ilə optimallaşdır">
+                            ✨ Hamısını Optimallaşdır
+                        </button>
+                        <span class="ai-loading-spinner-inline hidden" id="optimizeAllSpinner"></span>
+                    </div>
+                </div>
                 <form id="reviewForm">
                     <div class="form-group">
-                        <label for="learned">Bu günə kimi nə öyrəndi?</label>
+                        <div class="label-row">
+                            <label for="learned">Bu günə kimi nə öyrəndi?</label>
+                            <div class="ai-btn-wrapper">
+                                <button type="button" class="ai-optimize-btn" data-field="learned" title="AI ilə optimallaşdır">
+                                    ✨ AI
+                                </button>
+                                <span class="ai-loading-spinner-inline hidden" data-field="learned"></span>
+                            </div>
+                        </div>
                         <textarea id="learned" name="learned" rows="5" placeholder="Tələbənin bu günə kimi öyrəndiyi mövzuları yazın..." required></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label for="today">Bu gün nə edəcəkdir?</label>
+                        <div class="label-row">
+                            <label for="today">Bu gün nə edəcəkdir?</label>
+                            <div class="ai-btn-wrapper">
+                                <button type="button" class="ai-optimize-btn" data-field="today" title="AI ilə optimallaşdır">
+                                    ✨ AI
+                                </button>
+                                <span class="ai-loading-spinner-inline hidden" data-field="today"></span>
+                            </div>
+                        </div>
                         <textarea id="today" name="today" rows="5" placeholder="Tələbənin bu gün edəcəyi tapşırıqları yazın..." required></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label for="feedback">Öz Fikrin</label>
+                        <div class="label-row">
+                            <label for="feedback">Öz Fikrin</label>
+                            <div class="ai-btn-wrapper">
+                                <button type="button" class="ai-optimize-btn" data-field="feedback" title="AI ilə optimallaşdır">
+                                    ✨ AI
+                                </button>
+                                <span class="ai-loading-spinner-inline hidden" data-field="feedback"></span>
+                            </div>
+                        </div>
                         <textarea id="feedback" name="feedback" rows="5" placeholder="Ümumi qiymətləndirmə və təkliflərinizi yazın..." required></textarea>
                     </div>
 
                     <div class="form-buttons">
                         <button type="button" class="cancel-btn" onclick="studentDetailController.goBack()">Ləğv et</button>
-                        <button type="submit" class="submit-btn">Qiymətləndirməni göndər</button>
+                        <button type="submit" class="submit-btn">Göndər</button>
                     </div>
                 </form>
             </div>
@@ -83,6 +115,7 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="../../js/config.js"></script>
     <script src="../../js/utils/UIHelper.js"></script>
+    <script src="../../js/services/GeminiService.js"></script>
     <script src="../../js/models/StudentModel.js"></script>
     <script src="../../js/models/ProgressModel.js"></script>
     <script src="../../js/models/ReviewModel.js"></script>

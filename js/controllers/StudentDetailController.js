@@ -7,6 +7,9 @@ class StudentDetailController {
         this.reviewerId = null;
         this.latestProgress = null;
         this.previousProgress = null;
+        this.geminiService = null;
+        this.currentAiField = null;
+        this.currentAiText = null;
     }
     
     async init() {
@@ -16,6 +19,7 @@ class StudentDetailController {
         await this.loadProgressData();
         await this.loadReviews();
         this.setupForm();
+        this.setupAI();
     }
     
     async checkAuth() {
@@ -246,5 +250,213 @@ class StudentDetailController {
     
     goBack() {
         window.location.href = '../';
+    }
+
+    // =====================
+    // AI FUNCTIONALITY
+    // =====================
+    
+    setupAI() {
+        // Initialize Gemini Service
+        this.geminiService = new GeminiService();
+        this.originalTexts = {};
+        
+        // Setup AI optimize buttons (individual)
+        document.querySelectorAll('.ai-optimize-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const field = e.target.closest('.ai-optimize-btn').dataset.field;
+                this.optimizeWithAI(field);
+            });
+        });
+        
+        // Setup "Optimize All" button
+        const optimizeAllBtn = document.getElementById('optimizeAllBtn');
+        if (optimizeAllBtn) {
+            optimizeAllBtn.addEventListener('click', () => this.optimizeAllWithAI());
+        }
+        
+        // Update button states based on API key availability
+        this.updateAiButtonStates();
+    }
+    
+    updateAiButtonStates() {
+        const hasApiKey = this.geminiService.hasApiKey();
+        document.querySelectorAll('.ai-optimize-btn').forEach(btn => {
+            if (!hasApiKey) {
+                btn.title = 'API açarı yoxdur. Tənzimləmələrdən daxil edin.';
+            } else {
+                btn.title = 'AI ilə optimallaşdır';
+            }
+        });
+        
+        const optimizeAllBtn = document.getElementById('optimizeAllBtn');
+        if (optimizeAllBtn) {
+            if (!hasApiKey) {
+                optimizeAllBtn.title = 'API açarı yoxdur. Tənzimləmələrdən daxil edin.';
+            } else {
+                optimizeAllBtn.title = 'Bütün sahələri AI ilə optimallaşdır (1 sorğu)';
+            }
+        }
+    }
+    
+    async optimizeAllWithAI() {
+        const learnedTextarea = document.getElementById('learned');
+        const todayTextarea = document.getElementById('today');
+        const feedbackTextarea = document.getElementById('feedback');
+        
+        const learned = learnedTextarea?.value.trim() || '';
+        const today = todayTextarea?.value.trim() || '';
+        const feedback = feedbackTextarea?.value.trim() || '';
+        
+        // Check if at least one field has content
+        if (!learned && !today && !feedback) {
+            UIHelper.showNotification('Ən azı bir sahəyə mətn yazın', 'error');
+            return;
+        }
+        
+        if (!this.geminiService.hasApiKey()) {
+            UIHelper.showNotification('API açarı yoxdur. Tənzimləmələrə keçid edilir...', 'error');
+            setTimeout(() => {
+                window.location.href = '../../settings/';
+            }, 1500);
+            return;
+        }
+        
+        // Store original texts for undo
+        this.originalTexts = this.originalTexts || {};
+        if (learned) this.originalTexts['learned'] = learned;
+        if (today) this.originalTexts['today'] = today;
+        if (feedback) this.originalTexts['feedback'] = feedback;
+        
+        // Show loading spinner
+        const spinner = document.getElementById('optimizeAllSpinner');
+        const btn = document.getElementById('optimizeAllBtn');
+        if (spinner) spinner.classList.remove('hidden');
+        if (btn) btn.disabled = true;
+        
+        try {
+            const result = await this.geminiService.optimizeAllReviewTexts(
+                learned || '(boş)',
+                today || '(boş)',
+                feedback || '(boş)'
+            );
+            
+            // Update textareas with optimized text
+            if (learned && result.learned && result.learned !== '(boş)') {
+                learnedTextarea.value = result.learned;
+                this.showUndoButton('learned');
+            }
+            if (today && result.today && result.today !== '(boş)') {
+                todayTextarea.value = result.today;
+                this.showUndoButton('today');
+            }
+            if (feedback && result.feedback && result.feedback !== '(boş)') {
+                feedbackTextarea.value = result.feedback;
+                this.showUndoButton('feedback');
+            }
+            
+            UIHelper.showNotification(`Hamısı optimallaşdırıldı (${result.model})`, 'success');
+            
+        } catch (error) {
+            console.error('AI optimization failed:', error);
+            UIHelper.showNotification(error.message || 'AI xətası baş verdi', 'error');
+        } finally {
+            if (spinner) spinner.classList.add('hidden');
+            if (btn) btn.disabled = false;
+        }
+    }
+    
+    async optimizeWithAI(fieldId) {
+        const textarea = document.getElementById(fieldId);
+        if (!textarea) return;
+        
+        const text = textarea.value.trim();
+        
+        if (!text) {
+            UIHelper.showNotification('Optimallaşdırmaq üçün mətn yazın', 'error');
+            return;
+        }
+        
+        if (!this.geminiService.hasApiKey()) {
+            UIHelper.showNotification('API açarı yoxdur. Tənzimləmələrə keçid edilir...', 'error');
+            setTimeout(() => {
+                window.location.href = '../../settings/';
+            }, 1500);
+            return;
+        }
+        
+        // Store original text for undo
+        this.originalTexts = this.originalTexts || {};
+        this.originalTexts[fieldId] = text;
+        
+        // Show inline loading spinner next to the button
+        this.showAiLoading(true, fieldId);
+        
+        try {
+            const result = await this.geminiService.optimizeReviewText(text, fieldId);
+            
+            // Put optimized text directly in textarea
+            textarea.value = result.text;
+            
+            // Show undo button
+            this.showUndoButton(fieldId);
+            
+            UIHelper.showNotification(`AI ilə optimallaşdırıldı (${result.model})`, 'success');
+            
+        } catch (error) {
+            console.error('AI optimization failed:', error);
+            UIHelper.showNotification(error.message || 'AI xətası baş verdi', 'error');
+        } finally {
+            this.showAiLoading(false, fieldId);
+        }
+    }
+    
+    showAiLoading(show, fieldId) {
+        // Show/hide the inline spinner next to the specific field's AI button
+        const spinner = document.querySelector(`.ai-loading-spinner-inline[data-field="${fieldId}"]`);
+        const button = document.querySelector(`.ai-optimize-btn[data-field="${fieldId}"]`);
+        
+        if (spinner) {
+            spinner.classList.toggle('hidden', !show);
+        }
+        if (button) {
+            button.disabled = show;
+        }
+    }
+    
+    showUndoButton(fieldId) {
+        // Remove any existing undo button for this field
+        const existingUndo = document.querySelector(`.ai-undo-btn[data-field="${fieldId}"]`);
+        if (existingUndo) existingUndo.remove();
+        
+        // Create undo button
+        const undoBtn = document.createElement('button');
+        undoBtn.type = 'button';
+        undoBtn.className = 'ai-undo-btn';
+        undoBtn.dataset.field = fieldId;
+        undoBtn.innerHTML = '↩ Geri';
+        undoBtn.title = 'Əvvəlki mətni qaytar';
+        undoBtn.onclick = () => this.undoAiText(fieldId);
+        
+        // Add undo button next to AI button
+        const wrapper = document.querySelector(`.ai-btn-wrapper:has([data-field="${fieldId}"])`);
+        if (wrapper) {
+            wrapper.appendChild(undoBtn);
+        }
+    }
+    
+    undoAiText(fieldId) {
+        if (this.originalTexts && this.originalTexts[fieldId]) {
+            const textarea = document.getElementById(fieldId);
+            if (textarea) {
+                textarea.value = this.originalTexts[fieldId];
+                UIHelper.showNotification('Mətn geri qaytarıldı', 'success');
+            }
+            delete this.originalTexts[fieldId];
+        }
+        
+        // Remove undo button
+        const undoBtn = document.querySelector(`.ai-undo-btn[data-field="${fieldId}"]`);
+        if (undoBtn) undoBtn.remove();
     }
 }

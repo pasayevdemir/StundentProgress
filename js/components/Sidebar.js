@@ -5,6 +5,8 @@ class Sidebar {
         this.currentPath = window.location.pathname;
         this.isDesktop = window.innerWidth > 1024;
         this.isDarkMode = localStorage.getItem('darkMode') === 'true';
+        // Load desktop sidebar state (default to open if not set)
+        this.desktopSidebarOpen = localStorage.getItem('sidebarOpen') !== 'false';
     }
 
     init() {
@@ -12,9 +14,11 @@ class Sidebar {
         this.setupEventListeners();
         this.applyTheme();
         
-        // Open sidebar by default on desktop
+        // Restore sidebar state on desktop
         if (this.isDesktop) {
-            this.openDesktop();
+            if (this.desktopSidebarOpen) {
+                this.openDesktop();
+            }
         }
     }
 
@@ -22,7 +26,7 @@ class Sidebar {
         // Determine base path based on current location
         if (this.currentPath.includes('/review/write/')) {
             return '../../';
-        } else if (this.currentPath.includes('/review/') || this.currentPath.includes('/login/') || this.currentPath.includes('/dashboard/') || this.currentPath.includes('/leaderboard/')) {
+        } else if (this.currentPath.includes('/review/') || this.currentPath.includes('/login/') || this.currentPath.includes('/dashboard/') || this.currentPath.includes('/leaderboard/') || this.currentPath.includes('/settings/')) {
             return '../';
         }
         return './';
@@ -56,15 +60,13 @@ class Sidebar {
                 id: 'settings',
                 icon: '⚙️',
                 label: 'Tənzimləmələr',
-                path: '#',
-                active: false,
-                disabled: true
+                path: `${basePath}settings/`,
+                active: this.currentPath.includes('/settings/')
             }
         ];
     }
 
     render() {
-        const basePath = this.getBasePath();
         const themeIcon = this.isDarkMode ? '☀️' : '🌙';
         const themeLabel = this.isDarkMode ? 'Açıq Tema' : 'Qaranlıq Tema';
         
@@ -161,7 +163,10 @@ class Sidebar {
             this.isDesktop = window.innerWidth > 1024;
             
             if (this.isDesktop && !wasDesktop) {
-                this.openDesktop();
+                // Switched to desktop - restore saved state
+                if (this.desktopSidebarOpen) {
+                    this.openDesktop();
+                }
             } else if (!this.isDesktop && wasDesktop) {
                 this.close();
             }
@@ -199,6 +204,8 @@ class Sidebar {
     
     openDesktop() {
         this.isOpen = true;
+        this.desktopSidebarOpen = true;
+        localStorage.setItem('sidebarOpen', 'true');
         document.getElementById('sidebar').classList.add('desktop-open');
         document.getElementById('hamburgerBtn').classList.add('active');
         document.body.classList.add('sidebar-expanded');
@@ -206,6 +213,8 @@ class Sidebar {
     
     closeDesktop() {
         this.isOpen = false;
+        this.desktopSidebarOpen = false;
+        localStorage.setItem('sidebarOpen', 'false');
         document.getElementById('sidebar').classList.remove('desktop-open');
         document.getElementById('hamburgerBtn').classList.remove('active');
         document.body.classList.remove('sidebar-expanded');

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tənzimləmələr - PeerStack</title>
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="container">
+            <!-- API Key Section -->
+            <div class="settings-section">
+                <div class="settings-card">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Gemini API Keyi</h3>
+                            <p>Google AI Studio-dan API keyinizi əldə edə bilərsiniz. Bu key AI funksiyalarını aktiv etmək üçün lazımdır.</p>
+                            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="api-link">
+                                🔗 API keyi əldə et
+                            </a>
+                        </div>
+                        <div class="setting-control">
+                            <div class="input-group">
+                                <input type="password" id="geminiApiKey" placeholder="API keyinizi daxil edin..." autocomplete="off">
+                                <button type="button" class="toggle-visibility-btn" id="toggleApiKeyVisibility">
+                                    👁️
+                                </button>
+                            </div>
+                            <div class="button-group">
+                                <button type="button" class="save-btn" id="saveApiKey">
+                                    💾 Saxla
+                                </button>
+                                <button type="button" class="test-btn" id="testApiKey">
+                                    🧪 Test et
+                                </button>
+                                <button type="button" class="delete-btn" id="deleteApiKey">
+                                    🗑️ Sil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Status -->
+                    <div class="api-status" id="apiStatus">
+                        <div class="status-indicator" id="statusIndicator">
+                            <span class="status-dot"></span>
+                            <span class="status-text">API keyi yoxlanılır...</span>
+                        </div>
+                    </div>
+
+                    <!-- Model Info -->
+                    <div class="model-info" id="modelInfo" style="display: none;">
+                        <h4>Mövcud Modellər</h4>
+                        <div class="models-list" id="modelsList">
+                            <!-- Models will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div id="notificationPopup" class="notification-popup hidden">
+        <div class="notification-content">
+            <div class="notification-icon">✓</div>
+            <p id="notificationMessage"></p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/utils/UIHelper.js"></script>
+    <script src="../js/services/GeminiService.js"></script>
+    <script src="../js/components/Sidebar.js"></script>
+    <script src="settings.js"></script>
+</body>
+</html>
