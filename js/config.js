@@ -6,6 +6,33 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Module durations configuration (in months)
+// null = excluded from leaderboard performance calculations
+// Modules are completed sequentially
+const MODULE_DURATIONS = {
+    'Onboarding': null,
+    'Preseason Web': 1.5,
+    'Preseason Data': null,
+    'Season 01 Arc 01': 3,
+    'Season 01 Arc 02': 3.5,
+    'Season 01 Cloud Devops': null,
+    'Season 02 Fullstack': 2,
+    'Season 03 Fullstack Java': null,
+    'Season 03 Fullstack Python': null,
+    'Season 03 Frontend': 2,
+    'Season 03 Backend': null,
+    'Season 03 Cloud Engineer': null,
+    'Season 02 Data Science': null,
+    'Season 02 Software Engineer': null,
+    'Season 03 Software Engineer Golang': null,
+    'Season 03 Software Engineer CPP': null,
+    'Season 03 Software Engineer Rust': null,
+    'Season 03 Machine Learning': null,
+    'Season 03 Data Science': null,
+    'Season 03 Agentic AI': null,
+    'Season 04 Masters': null
+};
+
 // Module columns configuration
 const MODULE_COLUMNS = [
     'Onboarding', 

@@ -108,13 +108,14 @@ class LeaderboardController {
 
         tbody.innerHTML = filteredData.map((student, index) => {
             const globalRank = this.leaderboardData.findIndex(s => s.ID === student.ID) + 1;
-            const performanceRatio = student.performanceRatio.toFixed(0);
+            // Use completion percentage for display (actual progress / max possible)
+            const completionPercent = student.completionPercentage ? student.completionPercentage.toFixed(0) : '0';
             const perf = student.performance;
             const monthsInProgram = student.monthsInProgram ? student.monthsInProgram.toFixed(1) : '0';
             const completedModules = student.completedModules || 0;
             
-            // Progress bar shows performance ratio (capped at 150% for display)
-            const progressBarWidth = Math.min(performanceRatio, 150) / 1.5;
+            // Progress bar shows completion percentage (0-100%)
+            const progressBarWidth = Math.min(completionPercent, 100);
             
             return `
                 <tr class="leaderboard-row level-${perf.level}">
@@ -144,7 +145,7 @@ class LeaderboardController {
                             <div class="progress-bar-mini">
                                 <div class="progress-fill-mini" style="width: ${progressBarWidth}%; background-color: ${perf.color}"></div>
                             </div>
-                            <span class="progress-percent">${performanceRatio}%</span>
+                            <span class="progress-percent">${completionPercent}%</span>
                         </div>
                     </td>
                     <td>

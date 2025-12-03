@@ -180,22 +180,48 @@ class ProgressModel {
     // Modules to exclude from leaderboard calculations (no tasks, reading only)
     static EXCLUDED_MODULES = ['Onboarding'];
     
-    // Get modules that count for leaderboard
+    // Get modules that count for leaderboard (all except Onboarding)
     static getLeaderboardModules() {
         return MODULE_COLUMNS.filter(module => !this.EXCLUDED_MODULES.includes(module));
     }
     
+    // Get modules with defined durations for performance calculation
+    static getModulesWithDurations() {
+        return MODULE_COLUMNS.filter(module => MODULE_DURATIONS[module] !== null);
+    }
+    
+    // Get the sequential timeline of modules with durations
+    // Returns array of { module, duration, startMonth, endMonth }
+    static getModuleTimeline() {
+        const modulesWithDurations = this.getModulesWithDurations();
+        let currentMonth = 0;
+        
+        return modulesWithDurations.map(module => {
+            const duration = MODULE_DURATIONS[module];
+            const startMonth = currentMonth;
+            const endMonth = currentMonth + duration;
+            currentMonth = endMonth;
+            
+            return {
+                module,
+                duration,
+                startMonth,
+                endMonth
+            };
+        });
+    }
+    
     // Calculate total progress across all modules (cumulative completion)
-    // Excludes Onboarding as it has no tasks
-    static calculateTotalProgress(progress) {
+    // If forLeaderboard is true, only count modules with defined durations
+    static calculateTotalProgress(progress, forLeaderboard = false) {
         if (!progress) return { totalProgress: 0, moduleCount: 0, completedModules: 0 };
         
-        const leaderboardModules = this.getLeaderboardModules();
+        const modules = forLeaderboard ? this.getModulesWithDurations() : this.getLeaderboardModules();
         let totalProgress = 0;
         let moduleCount = 0;
         let completedModules = 0;
         
-        leaderboardModules.forEach(module => {
+        modules.forEach(module => {
             const value = progress[module];
             if (value !== null && value !== undefined) {
                 totalProgress += value;
@@ -210,9 +236,8 @@ class ProgressModel {
             totalProgress: totalProgress,
             moduleCount: moduleCount,
             completedModules: completedModules,
-            // Total possible is leaderboardModules * 100 (excluding Onboarding)
-            maxPossible: leaderboardModules.length * 100,
-            totalModules: leaderboardModules.length
+            maxPossible: modules.length * 100,
+            totalModules: modules.length
         };
     }
     
@@ -250,35 +275,40 @@ class ProgressModel {
         return Math.max(0, months + partialMonth);
     }
     
-    // Expected progress based on time in program
-    // Curriculum is roughly:
-    // Month 1-2: Onboarding + Preseason (2 modules) - ~10% of total
-    // Month 3-4: Season 01 (3 modules) - ~15% of total  
-    // Month 5-8: Season 02 (2 modules) - ~10% of total
-    // Month 9-14: Season 03 (13 modules) - ~60% of total
-    // Month 15+: Season 04 Masters - ~5% of total
-    // Total: 21 modules = 2100 points max
+    // Expected progress based on time in program using sequential module timeline
+    // Each module has a defined duration in MODULE_DURATIONS
+    // Modules with null duration are excluded from calculation
     static calculateExpectedProgress(monthsInProgram) {
-        // Expected progress percentage based on months
-        // This is cumulative expected progress
         if (monthsInProgram <= 0) return 0;
         
-        // Define expected monthly progress rate
-        // Students should complete roughly 5-7% of total curriculum per month
-        // With 20 modules at 100 points each = 2000 total points (excluding Onboarding)
-        // Expected rate: ~100 points per month (about 1 module per month on average)
+        const timeline = this.getModuleTimeline();
+        let expectedProgress = 0;
         
-        const leaderboardModules = this.getLeaderboardModules();
-        const expectedMonthlyProgress = 100; // 100 points = 1 module per month
-        const maxProgress = leaderboardModules.length * 100; // 2000 (20 modules)
+        timeline.forEach(({ module, startMonth, endMonth }) => {
+            if (monthsInProgram >= endMonth) {
+                // Module should be 100% complete based on time
+                expectedProgress += 100;
+            } else if (monthsInProgram > startMonth) {
+                // Module is in progress - calculate partial expected completion
+                const timeInModule = monthsInProgram - startMonth;
+                const moduleDuration = endMonth - startMonth;
+                const percentComplete = (timeInModule / moduleDuration) * 100;
+                expectedProgress += percentComplete;
+            }
+            // If monthsInProgram <= startMonth, module hasn't started yet (0 expected)
+        });
         
-        const expectedProgress = monthsInProgram * expectedMonthlyProgress;
-        
-        // Cap at max possible
-        return Math.min(expectedProgress, maxProgress);
+        return expectedProgress;
     }
     
-    // Calculate performance ratio: actual vs expected
+    // Calculate completion percentage: actual vs max possible
+    // This gives a simple percentage of how much curriculum is completed
+    static calculateCompletionPercentage(actualProgress, maxPossible) {
+        if (maxPossible <= 0) return 0;
+        return (actualProgress / maxPossible) * 100;
+    }
+    
+    // Calculate performance ratio: actual vs expected (for badge coloring)
     static calculatePerformanceRatio(actualProgress, expectedProgress) {
         if (expectedProgress <= 0) return 100; // New student, no expectations yet
         
@@ -309,9 +339,9 @@ class ProgressModel {
                 const progress = await this.getLatestByStudentId(student.ID);
                 const startDate = await this.getStudentStartDate(student.ID);
                 
-                // Calculate actual progress
+                // Calculate actual progress (forLeaderboard = true to only count modules with durations)
                 const { totalProgress, moduleCount, completedModules, maxPossible } = 
-                    this.calculateTotalProgress(progress);
+                    this.calculateTotalProgress(progress, true);
                 
                 // Calculate time in program
                 const monthsInProgram = this.calculateMonthsInProgram(startDate);
@@ -319,8 +349,11 @@ class ProgressModel {
                 // Calculate expected progress based on time
                 const expectedProgress = this.calculateExpectedProgress(monthsInProgram);
                 
-                // Calculate performance ratio
+                // Calculate performance ratio (for badge coloring - ahead/behind schedule)
                 const performanceRatio = this.calculatePerformanceRatio(totalProgress, expectedProgress);
+                
+                // Calculate completion percentage (for display and ranking)
+                const completionPercentage = this.calculateCompletionPercentage(totalProgress, maxPossible);
                 
                 // Get performance level
                 const performance = this.getPerformanceLevel(performanceRatio);
@@ -333,6 +366,7 @@ class ProgressModel {
                     totalProgress: totalProgress,
                     expectedProgress: expectedProgress,
                     performanceRatio: performanceRatio,
+                    completionPercentage: completionPercentage,
                     completedModules: completedModules,
                     activeModuleCount: moduleCount,
                     performance
@@ -340,7 +374,8 @@ class ProgressModel {
             })
         );
         
-        // Sort by performance ratio descending (best performers first)
-        return studentsWithPerformance.sort((a, b) => b.performanceRatio - a.performanceRatio);
+        // Sort by completion percentage descending (most progress = highest rank)
+        // This ensures students who completed more modules rank higher
+        return studentsWithPerformance.sort((a, b) => b.completionPercentage - a.completionPercentage);
     }
 }
