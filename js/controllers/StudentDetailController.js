@@ -10,6 +10,7 @@ class StudentDetailController {
         this.geminiService = null;
         this.currentAiField = null;
         this.currentAiText = null;
+        this.selectedDays = 7; // Default to weekly
     }
     
     async init() {
@@ -20,6 +21,7 @@ class StudentDetailController {
         await this.loadReviews();
         this.setupForm();
         this.setupAI();
+        this.setupDateSelector();
     }
     
     async checkAuth() {
@@ -48,8 +50,11 @@ class StudentDetailController {
         }
     }
     
-    async loadProgressData() {
+    async loadProgressData(days = null) {
         try {
+            // Use provided days or default
+            const daysToCompare = days !== null ? days : this.selectedDays;
+            
             // Get latest progress by ProgressDate (not CreatedAt)
             this.latestProgress = await ProgressModel.getLatestByProgressDate(this.studentId);
             
@@ -61,27 +66,127 @@ class StudentDetailController {
             // Get ProgressDate of latest record
             const latestDate = new Date(this.latestProgress.ProgressDate);
             
-            // Calculate 1 week before
-            const oneWeekBefore = new Date(latestDate);
-            oneWeekBefore.setDate(oneWeekBefore.getDate() - 7);
+            // Calculate date based on selected days
+            const targetDate = new Date(latestDate);
+            targetDate.setDate(targetDate.getDate() - daysToCompare);
             
-            // Find progress closest to 1 week before latest ProgressDate
+            // Find progress closest to target date
             this.previousProgress = await ProgressModel.getProgressByDate(
                 this.studentId, 
-                oneWeekBefore.toISOString().split('T')[0]
+                targetDate.toISOString().split('T')[0]
             );
             
             // If no exact match, find the closest one before that date
             if (!this.previousProgress) {
                 this.previousProgress = await ProgressModel.getClosestProgressBeforeDate(
                     this.studentId,
-                    oneWeekBefore.toISOString().split('T')[0]
+                    targetDate.toISOString().split('T')[0]
                 );
             }
             
             this.renderProgress();
         } catch (error) {
             console.error('Progress yüklənə bilmədi:', error);
+        }
+    }
+    
+    async loadProgressByCustomDate(targetDateStr) {
+        try {
+            // Get latest progress by ProgressDate (current/today's progress)
+            this.latestProgress = await ProgressModel.getLatestByProgressDate(this.studentId);
+            
+            if (!this.latestProgress || !this.latestProgress.ProgressDate) {
+                this.renderProgress();
+                return;
+            }
+            
+            // Find progress for the selected date (this becomes the "previous" for comparison)
+            this.previousProgress = await ProgressModel.getProgressByDate(
+                this.studentId, 
+                targetDateStr
+            );
+            
+            // If no exact match, find the closest one to that date
+            if (!this.previousProgress) {
+                this.previousProgress = await ProgressModel.getClosestProgressBeforeDate(
+                    this.studentId,
+                    targetDateStr
+                );
+            }
+            
+            // Update subtitle with custom date info
+            const subtitle = document.querySelector('.section-subtitle');
+            if (subtitle) {
+                const latestDate = new Date(this.latestProgress.ProgressDate).toLocaleDateString('az-AZ');
+                const selectedDate = new Date(targetDateStr).toLocaleDateString('az-AZ');
+                subtitle.textContent = `Progress müqayisəsi: ${selectedDate} → ${latestDate}`;
+            }
+            
+            this.renderProgress();
+        } catch (error) {
+            console.error('Progress yüklənə bilmədi:', error);
+        }
+    }
+    
+    setupDateSelector() {
+        // Setup date buttons
+        const dateButtons = document.querySelectorAll('.date-btn');
+        dateButtons.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                // Update active state
+                dateButtons.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                // Clear custom date picker
+                const customDatePicker = document.getElementById('customDate');
+                if (customDatePicker) {
+                    customDatePicker.value = '';
+                }
+                
+                // Get days and reload progress
+                const days = parseInt(e.target.dataset.days);
+                this.selectedDays = days;
+                await this.loadProgressData(days);
+                
+                // Update subtitle
+                this.updateSubtitleText(days);
+            });
+        });
+        
+        // Setup custom date picker
+        const customDatePicker = document.getElementById('customDate');
+        if (customDatePicker) {
+            // Set max date to today (prevent future dates)
+            const today = new Date().toISOString().split('T')[0];
+            customDatePicker.max = today;
+            
+            customDatePicker.addEventListener('change', async (e) => {
+                const selectedDate = e.target.value;
+                if (selectedDate) {
+                    // Remove active state from buttons
+                    dateButtons.forEach(b => b.classList.remove('active'));
+                    
+                    // Load progress comparing today to selected date
+                    await this.loadProgressByCustomDate(selectedDate);
+                }
+            });
+        }
+    }
+    
+    updateSubtitleText(days) {
+        const subtitle = document.querySelector('.section-subtitle');
+        if (subtitle) {
+            let periodText = '';
+            if (days === 7) {
+                periodText = 'Son 1 həftəlik';
+            } else if (days === 10) {
+                periodText = 'Son 10 günlük';
+            } else if (days === 30) {
+                periodText = 'Son 1 aylıq';
+            } else {
+                periodText = `Son ${days} günlük`;
+            }
+            subtitle.textContent = `${periodText} progress dəyişiklikləri göstərilir`;
         }
     }
     

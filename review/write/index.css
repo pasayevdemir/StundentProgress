@@ -226,10 +226,84 @@ body {
     font-size: 1.125rem;
 }
 
+/* Date Selector */
+.date-selector {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.date-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.date-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: #4b5563;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.date-btn:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.date-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.date-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.date-picker-wrapper label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.custom-date-picker {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-color);
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.custom-date-picker:hover {
+    border-color: #d1d5db;
+}
+
+.custom-date-picker:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
 .section-subtitle {
     color: #6b7280;
     font-size: 0.9rem;
-    margin-top: -1rem;
+    margin-top: 0;
     margin-bottom: 1.5rem;
     font-style: italic;
     display: flex;
@@ -522,6 +596,48 @@ body.dark-theme .modules-section {
 
 body.dark-theme .section-subtitle {
     color: #94a3b8;
+}
+
+/* Dark theme date selector */
+body.dark-theme .date-selector {
+    background: #334155;
+    border-color: #475569;
+}
+
+body.dark-theme .date-btn {
+    background: #1e293b;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-theme .date-btn:hover {
+    background: #475569;
+    border-color: #64748b;
+}
+
+body.dark-theme .date-btn.active {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: white;
+}
+
+body.dark-theme .date-picker-wrapper label {
+    color: #94a3b8;
+}
+
+body.dark-theme .custom-date-picker {
+    background: #1e293b;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-theme .custom-date-picker:hover {
+    border-color: #64748b;
+}
+
+body.dark-theme .custom-date-picker:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 body.dark-theme .module-card {
@@ -1046,4 +1162,3 @@ body.dark-theme .ai-cancel-btn {
 body.dark-theme .ai-cancel-btn:hover {
     background: #475569;
 }
-
