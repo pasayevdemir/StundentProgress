@@ -53,6 +53,33 @@ class ProgressModel {
         return data;
     }
     
+    static async getClosestProgressAfterDate(studentId, targetDate) {
+        const { data, error } = await supabaseClient
+            .from('Progresses')
+            .select('*')
+            .eq('StudentID', studentId)
+            .gte('ProgressDate', targetDate)
+            .order('ProgressDate', { ascending: true })
+            .limit(1)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
+    }
+    
+    static async getEarliestProgress(studentId) {
+        const { data, error } = await supabaseClient
+            .from('Progresses')
+            .select('*')
+            .eq('StudentID', studentId)
+            .order('ProgressDate', { ascending: true })
+            .limit(1)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
+    }
+    
     static async getByStudentIdAndDateRange(studentId, startDate, endDate) {
         const { data, error } = await supabaseClient
             .from('Progresses')

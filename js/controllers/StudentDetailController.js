@@ -106,7 +106,7 @@ class StudentDetailController {
                 targetDateStr
             );
             
-            // If no exact match, find the closest one to that date
+            // If no exact match, try to find the closest one before that date
             if (!this.previousProgress) {
                 this.previousProgress = await ProgressModel.getClosestProgressBeforeDate(
                     this.studentId,
@@ -114,12 +114,21 @@ class StudentDetailController {
                 );
             }
             
-            // Update subtitle with custom date info
+            // If still no progress found (selected date is before student started),
+            // find the earliest progress (student's start date)
+            if (!this.previousProgress) {
+                this.previousProgress = await ProgressModel.getEarliestProgress(this.studentId);
+            }
+            
+            // Update subtitle with actual date info
             const subtitle = document.querySelector('.section-subtitle');
             if (subtitle) {
                 const latestDate = new Date(this.latestProgress.ProgressDate).toLocaleDateString('az-AZ');
-                const selectedDate = new Date(targetDateStr).toLocaleDateString('az-AZ');
-                subtitle.textContent = `Progress müqayisəsi: ${selectedDate} → ${latestDate}`;
+                // Use the actual previous progress date if found, otherwise show selected date
+                const previousDate = this.previousProgress && this.previousProgress.ProgressDate
+                    ? new Date(this.previousProgress.ProgressDate).toLocaleDateString('az-AZ')
+                    : new Date(targetDateStr).toLocaleDateString('az-AZ');
+                subtitle.textContent = `Progress müqayisəsi: ${previousDate} → ${latestDate}`;
             }
             
             this.renderProgress();
