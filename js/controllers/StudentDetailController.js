@@ -70,19 +70,28 @@ class StudentDetailController {
             const targetDate = new Date(latestDate);
             targetDate.setDate(targetDate.getDate() - daysToCompare);
             
-            // Find progress closest to target date
-            this.previousProgress = await ProgressModel.getProgressByDate(
-                this.studentId, 
+            console.log('Latest date:', latestDate.toISOString().split('T')[0]);
+            console.log('Target date (minus', daysToCompare, 'days):', targetDate.toISOString().split('T')[0]);
+            
+            // Find progress closest to target date (before it)
+            this.previousProgress = await ProgressModel.getClosestProgressBeforeDate(
+                this.studentId,
                 targetDate.toISOString().split('T')[0]
             );
             
-            // If no exact match, find the closest one before that date
+            // If no progress before target date, get the earliest progress
             if (!this.previousProgress) {
-                this.previousProgress = await ProgressModel.getClosestProgressBeforeDate(
-                    this.studentId,
-                    targetDate.toISOString().split('T')[0]
-                );
+                console.log('No progress before target date, getting earliest');
+                this.previousProgress = await ProgressModel.getEarliestProgress(this.studentId);
+                
+                // If earliest is same as latest, set to null (no comparison)
+                if (this.previousProgress && this.previousProgress.ID === this.latestProgress.ID) {
+                    this.previousProgress = null;
+                }
             }
+            
+            console.log('Previous progress:', this.previousProgress ? this.previousProgress.ProgressDate : 'null');
+            console.log('Latest progress:', this.latestProgress.ProgressDate);
             
             this.renderProgress();
         } catch (error) {
@@ -240,6 +249,10 @@ class StudentDetailController {
             ? ProgressModel.calculateDifference(this.latestProgress, this.previousProgress)
             : {};
         
+        console.log('Rendering progress with differences:', differences);
+        console.log('Latest progress data:', this.latestProgress);
+        console.log('Previous progress data:', this.previousProgress);
+        
         let html = '';
         
         MODULE_COLUMNS.forEach(module => {
@@ -261,21 +274,25 @@ class StudentDetailController {
                     }
                 }
                 
+                // Show change indicator if there's a difference OR if we're comparing and values differ
+                const hasChange = diff && diff.difference !== 0;
+                const changeIndicator = hasChange ? `
+                    <div class="progress-change ${diff.difference > 0 ? 'positive' : 'negative'}">
+                        ${previousPercent !== null ? `${previousPercent}% → ${progressPercent}%` : `${progressPercent}%`}
+                        <span style="font-weight: bold; margin-left: 0.5rem;">
+                            (${diff.difference > 0 ? '+' : ''}${diff.difference}%)
+                        </span>
+                    </div>
+                ` : '';
+                
                 html += `
-                    <div class="module-card ${diff ? 'has-change' : ''}">
+                    <div class="module-card ${hasChange ? 'has-change' : ''}">
                         <div class="module-name">${module}</div>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: ${progressPercent}%"></div>
                         </div>
                         <div class="progress-text">${progressPercent}%</div>
-                        ${diff && diff.difference > 0 ? `
-                            <div class="progress-change positive">
-                                ${previousPercent !== null ? `${previousPercent}% → ${progressPercent}%` : `${progressPercent}%`}
-                                <span style="font-weight: bold; margin-left: 0.5rem;">
-                                    (+${diff.difference}%)
-                                </span>
-                            </div>
-                        ` : ''}
+                        ${changeIndicator}
                     </div>
                 `;
             }
