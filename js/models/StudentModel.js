@@ -24,6 +24,11 @@ class StudentModel {
     }
     
     static async upsert(studentData) {
+        // Validate required fields
+        if (!studentData.LoginName || !studentData.Email) {
+            throw new Error('LoginName və Email zorunludur');
+        }
+        
         // First, check if student exists by LoginName
         const existing = await this.getByLoginName(studentData.LoginName);
         
@@ -35,8 +40,8 @@ class StudentModel {
                 .eq('ID', existing.ID)
                 .select();
             
-            if (error) throw error;
-            return data;
+            if (error) throw new Error(`Update failed: ${error.message}`);
+            return data || [];
         } else {
             // Insert new student
             const { data, error } = await supabaseClient
@@ -44,8 +49,8 @@ class StudentModel {
                 .insert(studentData)
                 .select();
             
-            if (error) throw error;
-            return data;
+            if (error) throw new Error(`Insert failed: ${error.message}`);
+            return data || [];
         }
     }
     

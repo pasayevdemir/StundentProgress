@@ -81,15 +81,19 @@ class CSVUploadController {
         
         if (!student) {
             // Yeni tələbə yarat
-            const result = await StudentModel.upsert(studentData);
-            student = result[0];
-            
-            if (!student || !student.ID) {
-                throw new Error('Tələbə yaradıla bilmədi');
+            try {
+                const result = await StudentModel.upsert(studentData);
+                student = result[0];
+                
+                if (!student || !student.ID) {
+                    throw new Error(`Tələbə yaradıla bilmədi (LoginName: ${studentData.LoginName})`);
+                }
+                
+                // Cache-ə əlavə et
+                this.studentsCache.set(student.LoginName, student);
+            } catch (error) {
+                throw new Error(`Tələbə yaradıla bilmədi: ${error.message}`);
             }
-            
-            // Cache-ə əlavə et
-            this.studentsCache.set(student.LoginName, student);
         }
         
         // 3. Progress məlumatını çıxart
