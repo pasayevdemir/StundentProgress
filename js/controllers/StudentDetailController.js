@@ -201,7 +201,7 @@ class StudentDetailController {
     
     async loadReviews() {
         try {
-            const reviews = await ReviewModel.getLastWeekReviews(this.studentId);
+            const reviews = await ReviewModel.getByStudentId(this.studentId);
             this.renderReviews(reviews);
         } catch (error) {
             console.error('Qiymətləndirmələr yüklənə bilmədi:', error);
@@ -289,7 +289,7 @@ class StudentDetailController {
         if (!container) return;
         
         if (!reviews || reviews.length === 0) {
-            container.innerHTML = '<div class="no-reviews">Son bir həftədə qiymətləndirmə yazılmamış</div>';
+            container.innerHTML = '<div class="no-reviews">Qiymətləndirmə yazılmayıb</div>';
             return;
         }
         
