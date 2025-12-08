@@ -9,7 +9,7 @@
 <body>
     <script>
         // Apply saved theme immediately
-        if (localStorage.getItem('theme') === 'dark') {
+        if (localStorage.getItem('darkMode') === 'true' || localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-theme');
         }
     </script>

@@ -22,10 +22,7 @@ body {
     color: var(--text-color);
 }
 
-.page-wrapper {
-    margin-left: 0;
-    transition: margin-left 0.3s ease;
-}
+
 
 .container {
     max-width: 1000px;

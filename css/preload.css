@@ -1,0 +1,4 @@
+/* Prevent transitions on load */
+body.preload * {
+    transition: none !important;
+}

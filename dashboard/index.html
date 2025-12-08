@@ -5,9 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ana Səhifə - PeerStack</title>
     <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/preload.css">
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
+    <script>
+        (function() {
+            document.body.classList.add('preload');
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-theme');
+            }
+            const sidebarOpen = localStorage.getItem('sidebarOpen') !== 'false';
+            if (!sidebarOpen) {
+                document.body.classList.add('sidebar-collapsed');
+            }
+        })();
+    </script>
     <div class="page-wrapper">
         <div class="container">
             <div class="header">

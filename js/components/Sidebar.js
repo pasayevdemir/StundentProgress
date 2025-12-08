@@ -16,10 +16,20 @@ class Sidebar {
         
         // Restore sidebar state on desktop
         if (this.isDesktop) {
-            if (this.desktopSidebarOpen) {
-                this.openDesktop();
+            if (!this.desktopSidebarOpen) {
+                this.closeDesktop();
+            } else {
+                // Ensure it's open (default state in CSS is open, so we just ensure class isn't there)
+                document.body.classList.remove('sidebar-collapsed');
+                this.isOpen = true;
+                document.getElementById('hamburgerBtn').classList.add('active');
             }
         }
+
+        // Remove preload class after a short delay to enable transitions
+        setTimeout(() => {
+            document.body.classList.remove('preload');
+        }, 100);
     }
 
     getBasePath() {
@@ -206,18 +216,16 @@ class Sidebar {
         this.isOpen = true;
         this.desktopSidebarOpen = true;
         localStorage.setItem('sidebarOpen', 'true');
-        document.getElementById('sidebar').classList.add('desktop-open');
+        document.body.classList.remove('sidebar-collapsed');
         document.getElementById('hamburgerBtn').classList.add('active');
-        document.body.classList.add('sidebar-expanded');
     }
     
     closeDesktop() {
         this.isOpen = false;
         this.desktopSidebarOpen = false;
         localStorage.setItem('sidebarOpen', 'false');
-        document.getElementById('sidebar').classList.remove('desktop-open');
+        document.body.classList.add('sidebar-collapsed');
         document.getElementById('hamburgerBtn').classList.remove('active');
-        document.body.classList.remove('sidebar-expanded');
     }
     
     toggleTheme() {

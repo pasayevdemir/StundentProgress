@@ -276,20 +276,56 @@
 
 /* Desktop sidebar open - push content */
 @media (min-width: 1025px) {
-    body.sidebar-expanded .page-wrapper {
+    /* Default state: Expanded */
+    .page-wrapper {
         margin-left: 280px;
     }
     
-    body.sidebar-expanded .hamburger-btn {
+    .hamburger-btn {
         left: 296px;
     }
+
+    .sidebar {
+        transform: translateX(0);
+    }
     
-    .sidebar.desktop-open + .sidebar-overlay {
+    .sidebar-overlay {
         display: none;
     }
     
     .sidebar-close {
         display: none;
+    }
+
+    /* Collapsed state */
+    body.sidebar-collapsed .page-wrapper {
+        margin-left: 0;
+    }
+    
+    body.sidebar-collapsed .hamburger-btn {
+        left: 1rem;
+    }
+
+    body.sidebar-collapsed .sidebar {
+        transform: translateX(-100%);
+    }
+
+    /* Sidebar Placeholder to prevent flash */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 100vh;
+        background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+        z-index: 1000;
+        transition: transform 0.3s ease;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    }
+
+    body.sidebar-collapsed::before {
+        transform: translateX(-100%);
     }
 }
 
