@@ -76,7 +76,7 @@ class CSVUploadController {
         // 1. Tələbə məlumatını çıxart
         const studentData = CSVParser.extractStudentData(row);
         
-        // 2. Cache-dən tələbəni tap
+        // 2. Cache-dən tələbəni tap və ya yarat
         let student = this.studentsCache.get(studentData.LoginName);
         
         if (!student) {
@@ -93,6 +93,18 @@ class CSVUploadController {
                 this.studentsCache.set(student.LoginName, student);
             } catch (error) {
                 throw new Error(`Tələbə yaradıla bilmədi: ${error.message}`);
+            }
+        } else {
+            // Mövcud tələbəni yenilə (email, cohort və s. dəyişə bilər)
+            try {
+                const result = await StudentModel.upsert(studentData);
+                if (result && result[0]) {
+                    student = result[0];
+                    this.studentsCache.set(student.LoginName, student);
+                }
+            } catch (error) {
+                console.warn(`Tələbə məlumatı yenilənə bilmədi (${studentData.LoginName}):`, error.message);
+                // Continue with cached student data
             }
         }
         
@@ -111,14 +123,18 @@ class CSVUploadController {
                 .update(progressData)
                 .eq('ID', existingProgress.ID);
             
-            if (error) throw error;
+            if (error) {
+                throw new Error(`Progress yenilənə bilmədi (StudentID: ${student.ID}): ${error.message}`);
+            }
         } else {
             // Insert new
             const { error } = await supabaseClient
                 .from('Progresses')
                 .insert(progressData);
             
-            if (error) throw error;
+            if (error) {
+                throw new Error(`Progress əlavə edilə bilmədi (StudentID: ${student.ID}): ${error.message}`);
+            }
         }
     }
     
