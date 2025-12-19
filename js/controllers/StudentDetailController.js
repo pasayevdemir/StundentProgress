@@ -19,6 +19,8 @@ class StudentDetailController {
         await this.loadStudentData();
         await this.loadProgressData();
         await this.loadReviews();
+        await this.loadPresentations();
+        this.setupTabNavigation();
         this.setupForm();
         this.setupAI();
         this.setupDateSelector();
@@ -337,18 +339,131 @@ class StudentDetailController {
             `;
         }).join('');
     }
+
+    async loadPresentations() {
+        try {
+            const presentations = await TechnicalPresentationModel.getByStudentId(this.studentId);
+            this.renderPresentations(presentations);
+        } catch (error) {
+            console.error('Təqdimatlar yüklənə bilmədi:', error);
+        }
+    }
+
+    renderPresentations(presentations) {
+        const container = document.getElementById('presentationsList');
+        if (!container) return;
+        
+        if (!presentations || presentations.length === 0) {
+            container.innerHTML = '<div class="no-reviews">Texniki təqdimat qiymətləndirməsi yoxdur</div>';
+            return;
+        }
+        
+        container.innerHTML = presentations.map(pres => {
+            const reviewerName = pres.Reviewer 
+                ? `${pres.Reviewer.FirstName} ${pres.Reviewer.LastName}` 
+                : 'Bilinmir';
+            
+            const totalScore = TechnicalPresentationModel.calculateTotalScore(pres);
+            const scoreLevel = TechnicalPresentationModel.getScoreLevel(totalScore);
+            
+            return `
+                <div class="presentation-card">
+                    <div class="presentation-header">
+                        <div class="presentation-date">📅 ${UIHelper.formatDate(pres.created_at)}</div>
+                        <div class="presentation-reviewer">👤 ${UIHelper.escapeHtml(reviewerName)}</div>
+                    </div>
+                    
+                    <div class="presentation-scores">
+                        <div class="score-item">
+                            <span class="score-label">⏱️ Vaxt İdarəsi</span>
+                            <span class="score-value">${pres.TimeManagement}/10</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="score-label">🎤 Təqdimat Bacarığı</span>
+                            <span class="score-value">${pres.PresentationSkill}/10</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="score-label">📊 Slayd Hazırlığı</span>
+                            <span class="score-value">${pres.SlidePreparation}/10</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="score-label">📚 Mövzu Əhatəsi</span>
+                            <span class="score-value">${pres.TopicCoverage}/10</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="score-label">📈 İnkişaf</span>
+                            <span class="score-value">${pres.Progress}/10</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="score-label">🎨 Slayd Dizaynı</span>
+                            <span class="score-value">${pres.SlideDesign}/10</span>
+                        </div>
+                    </div>
+                    
+                    <div class="presentation-total" style="background: linear-gradient(135deg, ${scoreLevel.color}, ${scoreLevel.color}dd);">
+                        <span class="presentation-total-label">Ortalama: ${scoreLevel.label}</span>
+                        <span class="presentation-total-score">${totalScore}/10</span>
+                    </div>
+                    
+                    <div class="presentation-description">
+                        <span class="presentation-description-label">📝 Açıqlama:</span>
+                        ${UIHelper.escapeHtml(pres.Description)}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
     
     setupForm() {
         const form = document.getElementById('reviewForm');
         if (!form) return;
-        
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             await this.submitReview();
         });
     }
-    
-    async submitReview() {
+
+    setupTabNavigation() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+                
+                // Remove active class from all tabs and contents
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                btn.classList.add('active');
+                const targetContent = document.getElementById(`${tabName}Tab`);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            });
+        });
+    }
+
+    setupForm() {
+        const form = document.getElementById('reviewForm');
+        if (!form) return;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.submitReview();
+        });
+
+        // Setup presentation form
+        const presentationForm = document.getElementById('presentationForm');
+        if (presentationForm) {
+            presentationForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.submitPresentation();
+            });
+        }
+    }    async submitReview() {
         if (!this.reviewerId) {
             UIHelper.showNotification('Qiymətləndirən məlumatı tapılmadı', 'error');
             return;
@@ -376,6 +491,47 @@ class StudentDetailController {
         } catch (error) {
             console.error('Qiymətləndirmə saxlana bilmədi:', error);
             UIHelper.showNotification('Xəta: ' + error.message, 'error');
+        }
+    }
+
+    async submitPresentation() {
+        const form = document.getElementById('presentationForm');
+        const formData = new FormData(form);
+        
+        const presentationData = {
+            ReviewerID: this.reviewerId,
+            StudentID: this.studentId,
+            TimeManagement: parseInt(formData.get('TimeManagement')),
+            PresentationSkill: parseInt(formData.get('PresentationSkill')),
+            SlidePreparation: parseInt(formData.get('SlidePreparation')),
+            TopicCoverage: parseInt(formData.get('TopicCoverage')),
+            Progress: parseInt(formData.get('Progress')),
+            SlideDesign: parseInt(formData.get('SlideDesign')),
+            Description: formData.get('Description')
+        };
+        
+        console.log('Submitting presentation data:', presentationData);
+        console.log('Current user AuthID:', this.currentUser.id);
+        console.log('Reviewer ID:', this.reviewerId);
+        console.log('Student ID:', this.studentId);
+        
+        try {
+            await TechnicalPresentationModel.create(presentationData);
+            
+            form.reset();
+            await this.loadPresentations(); // Reload presentation history
+            UIHelper.showNotification('Texniki təqdimat qiymətləndirməsi uğurla saxlanıldı!', 'success');
+        } catch (error) {
+            console.error('Təqdimat qiymətləndirməsi saxlana bilmədi:', error);
+            console.error('Error details:', error.message, error.details, error.hint);
+            UIHelper.showNotification('Xəta: ' + error.message, 'error');
+        }
+    }
+
+    clearPresentationForm() {
+        const form = document.getElementById('presentationForm');
+        if (form) {
+            form.reset();
         }
     }
     

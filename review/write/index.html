@@ -41,39 +41,259 @@
                 </div>
             </div>
 
-            <!-- Modullar Bölməsi -->
-            <div class="modules-section">
-                <h3>Modullar və İrəliləmə</h3>
-                
-                <!-- Date Selector -->
-                <div class="date-selector">
-                    <div class="date-buttons">
-                        <button type="button" class="date-btn active" data-days="7">Həftəlik</button>
-                        <button type="button" class="date-btn" data-days="10">10 Gün</button>
-                        <button type="button" class="date-btn" data-days="30">Aylıq</button>
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" data-tab="write">Qiymətləndirmə Yaz</button>
+                <button class="tab-btn" data-tab="presentation">Texniki Təqdimat</button>
+                <button class="tab-btn" data-tab="presentationHistory">Təqdimat Tarixçəsi</button>
+                <button class="tab-btn" data-tab="reviews">Stand-up Raportlar</button>
+                <button class="tab-btn" data-tab="modules">Modullar</button>
+            </div>
+
+            <!-- Qiymətləndirmə Yaz Tab -->
+            <div class="tab-content active" id="writeTab">
+                <div class="review-form-section">
+                    <div class="form-header-row">
+                        <h3>Qiymətləndirmə Yaz</h3>
+                        <div class="ai-all-wrapper">
+                            <button type="button" class="ai-optimize-all-btn" id="optimizeAllBtn" title="Bütün sahələri AI ilə optimallaşdır">
+                                ✨ Hamısını Optimallaşdır
+                            </button>
+                            <span class="ai-loading-spinner-inline hidden" id="optimizeAllSpinner"></span>
+                        </div>
                     </div>
-                    <div class="date-picker-wrapper">
-                        <label for="customDate">📅 Tarix:</label>
-                        <input type="date" id="customDate" class="custom-date-picker" max="">
-                    </div>
-                </div>
-                
-                <p class="section-subtitle">Son 1 həftəlik progress dəyişiklikləri göstərilir</p>
-                <div class="modules-grid" id="modulesGrid">
-                    <!-- Modullar buraya yüklənəcək -->
+                    <form id="reviewForm">
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="learned">Bu günə kimi nə öyrəndi?</label>
+                                <div class="ai-btn-wrapper">
+                                    <button type="button" class="ai-optimize-btn" data-field="learned" title="AI ilə optimallaşdır">
+                                        ✨ AI
+                                    </button>
+                                    <span class="ai-loading-spinner-inline hidden" data-field="learned"></span>
+                                </div>
+                            </div>
+                            <textarea id="learned" name="learned" rows="5" placeholder="Tələbənin bu günə kimi öyrəndiyi mövzuları yazın..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="today">Bu gün nə edəcəkdir?</label>
+                                <div class="ai-btn-wrapper">
+                                    <button type="button" class="ai-optimize-btn" data-field="today" title="AI ilə optimallaşdır">
+                                        ✨ AI
+                                    </button>
+                                    <span class="ai-loading-spinner-inline hidden" data-field="today"></span>
+                                </div>
+                            </div>
+                            <textarea id="today" name="today" rows="5" placeholder="Tələbənin bu gün edəcəyi tapşırıqları yazın..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="feedback">Öz Fikrin</label>
+                                <div class="ai-btn-wrapper">
+                                    <button type="button" class="ai-optimize-btn" data-field="feedback" title="AI ilə optimallaşdır">
+                                        ✨ AI
+                                    </button>
+                                    <span class="ai-loading-spinner-inline hidden" data-field="feedback"></span>
+                                </div>
+                            </div>
+                            <textarea id="feedback" name="feedback" rows="5" placeholder="Ümumi qiymətləndirmə və təkliflərinizi yazın..." required></textarea>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="button" class="cancel-btn" onclick="studentDetailController.goBack()">Ləğv et</button>
+                            <button type="submit" class="submit-btn">Göndər</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <!-- Son Qiymətləndirmələr -->
-            <div class="previous-reviews-section">
-                <h3>Son Qiymətləndirmələr</h3>
-                <div class="reviews-list" id="reviewsList">
-                    <!-- Qiymətləndirmələr buraya yüklənəcək -->
+            <!-- Texniki Təqdimat Tab -->
+            <div class="tab-content" id="presentationTab">
+                <div class="presentation-form-section">
+                    <form id="presentationForm">
+                        <div class="rating-group">
+                            <label class="rating-label" for="TimeManagement">⏱️ Vaxt İdarəsi (Time Management)</label>
+                            <select name="TimeManagement" id="TimeManagement" class="rating-select" required>
+                                <option value="">Seçin...</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                            </select>
+                        </div>
+
+                        <div class="rating-group">
+                            <label class="rating-label" for="PresentationSkill">🎤 Təqdimat Bacarığı</label>
+                            <select name="PresentationSkill" id="PresentationSkill" class="rating-select" required>
+                                <option value="">Seçin...</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                            </select>
+                            <p class="rating-description">Mövzunu nə qədər aydın və rahat izah edə bilir.</p>
+                        </div>
+
+                        <div class="rating-group">
+                            <label class="rating-label" for="SlidePreparation">📊 Slayd Hazırlıq Bacarığı</label>
+                            <select name="SlidePreparation" id="SlidePreparation" class="rating-select" required>
+                                <option value="">Seçin...</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                            </select>
+                            <p class="rating-description">Slaydın mövzunu nə qədərə əhatə etdiyini göstərir.</p>
+                        </div>
+
+                        <div class="rating-group">
+                            <label class="rating-label" for="TopicCoverage">📚 Mövzu Əhatə Etmə Bacarığı</label>
+                            <select name="TopicCoverage" id="TopicCoverage" class="rating-select" required>
+                                <option value="">Seçin...</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                            </select>
+                        </div>
+
+                        <div class="rating-group">
+                            <label class="rating-label">📈 İnkişaf</label>
+                            <select name="Progress" class="rating-select" required>
+                                <option value="" disabled selected>Seçin...</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                            </select>
+                            <p class="rating-description">2 həftə ərzində inkişafı nə qədər necə olub.</p>
+                        </div>
+
+                        <div class="rating-group">
+                            <label class="rating-label">🎨 Slayd Dizayn</label>
+                            <select name="SlideDesign" class="rating-select" required>
+                                <option value="" disabled selected>Seçin...</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                            </select>
+                            <p class="rating-description">Slayd nə qədər visual görsələr var. Nə qədər aydın doğru biçimdə hazırlanıb.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="presentationDescription">📝 Açıqlama</label>
+                            <textarea id="presentationDescription" name="Description" rows="5" placeholder="Təqdimat haqqında əlavə qeydlərinizi yazın..." required></textarea>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="button" class="cancel-btn" onclick="studentDetailController.clearPresentationForm()">Təmizlə</button>
+                            <button type="submit" class="submit-btn">Göndər</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <!-- Qiymətləndirmə Formu -->
-            <div class="review-form-section">
+            <!-- Təqdimat Tarixçəsi Tab -->
+            <div class="tab-content" id="presentationHistoryTab">
+                <div class="presentation-history-section">
+                    <div class="presentations-list" id="presentationsList">
+                        <!-- Təqdimatlar buraya yüklənəcək -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Qiymətlər Tab -->
+            <div class="tab-content" id="reviewsTab">
+                <div class="previous-reviews-section">
+                    <div class="reviews-list" id="reviewsList">
+                        <!-- Qiymətləndirmələr buraya yüklənəcək -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modullar Tab -->
+            <div class="tab-content" id="modulesTab">
+                <div class="modules-section">
+                    
+                    <!-- Date Selector -->
+                    <div class="date-selector">
+                        <div class="date-buttons">
+                            <button type="button" class="date-btn active" data-days="7">Həftəlik</button>
+                            <button type="button" class="date-btn" data-days="10">10 Gün</button>
+                            <button type="button" class="date-btn" data-days="30">Aylıq</button>
+                        </div>
+                        <div class="date-picker-wrapper">
+                            <label for="customDate">📅 Tarix:</label>
+                            <input type="date" id="customDate" class="custom-date-picker" max="">
+                        </div>
+                    </div>
+                    
+                    <p class="section-subtitle">Son 1 həftəlik progress dəyişiklikləri göstərilir</p>
+                    <div class="modules-grid" id="modulesGrid">
+                        <!-- Modullar buraya yüklənəcək -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Qiymətlər Tab -->
+            <div class="tab-content" id="reviewsTab">
+                <div class="previous-reviews-section">
+                    <h3>Son Qiymətləndirmələr</h3>
+                    <div class="reviews-list" id="reviewsList">
+                        <!-- Qiymətləndirmələr buraya yüklənəcək -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Qiymətləndirmə Yaz Tab -->
+            <div class="tab-content" id="writeTab">
+                <div class="review-form-section">
                 <div class="form-header-row">
                     <h3>Qiymətləndirmə Yaz</h3>
                     <div class="ai-all-wrapper">
@@ -129,6 +349,7 @@
                     </div>
                 </form>
             </div>
+            </div>
         </div>
     </div>
 
@@ -148,6 +369,7 @@
     <script src="../../js/models/ProgressModel.js"></script>
     <script src="../../js/models/ReviewModel.js"></script>
     <script src="../../js/models/ReviewerModel.js"></script>
+    <script src="../../js/models/TechnicalPresentationModel.js"></script>
     <script src="../../js/controllers/StudentDetailController.js"></script>
     <script src="../../js/components/Sidebar.js"></script>
     <script>
