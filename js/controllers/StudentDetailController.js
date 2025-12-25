@@ -24,6 +24,7 @@ class StudentDetailController {
         this.setupForm();
         this.setupAI();
         this.setupDateSelector();
+        this.setupBottomNavigation();
     }
     
     async checkAuth() {
@@ -35,6 +36,92 @@ class StudentDetailController {
         }
         
         this.currentUser = session.user;
+    }
+    
+    setupBottomNavigation() {
+        // Active state handling for bottom navbar is simpler:
+        // We highlight based on scroll position or click
+        // For now, simple click-to-activate
+        const bottomBtns = document.querySelectorAll('.bottom-nav-btn');
+        bottomBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Remove active from all
+                bottomBtns.forEach(b => b.classList.remove('active'));
+                // Add to clicked (closest button in case icon clicked)
+                const targetBtn = e.target.closest('.bottom-nav-btn');
+                if (targetBtn) targetBtn.classList.add('active');
+            });
+        });
+
+        // Optional: Scroll spy to update active button content
+        window.addEventListener('scroll', () => {
+            if (window.innerWidth <= 768) {
+                this.updateActiveBottomNavLink();
+            }
+        });
+    }
+
+    scrollToSection(sectionId) {
+        // Ensure Write Tab is active
+        const writeTabBtn = document.querySelector('.tab-btn[data-tab="write"]');
+        if (writeTabBtn && !writeTabBtn.classList.contains('active')) {
+            writeTabBtn.click();
+        }
+
+        const section = document.getElementById(sectionId);
+        if (section) {
+            // Offset for fixed header/navbar?
+            // Mobile header is ~4rem.
+            const headerOffset = 80; 
+            const elementPosition = section.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
+            });
+            
+            // Also update the active state of bottom nav manually
+            this.updateActiveBottomNavBySection(sectionId);
+        }
+    }
+
+    updateActiveBottomNavBySection(sectionId) {
+        let keyword = '';
+        if (sectionId === 'modulesSection') keyword = 'Modullar';
+        if (sectionId === 'writeSection') keyword = 'Qiymətləndirmə';
+        if (sectionId === 'reportsSection') keyword = 'Raportlar';
+
+        if (keyword) {
+            const bottomBtns = document.querySelectorAll('.bottom-nav-btn');
+            bottomBtns.forEach(btn => {
+                if (btn.innerText.includes(keyword)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+    }
+
+    updateActiveBottomNavLink() {
+        // Simple scroll spy
+        const sections = ['writeSection', 'modulesSection', 'reportsSection'];
+        let current = '';
+
+        sections.forEach(id => {
+            const section = document.getElementById(id);
+            if (section) {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 150) {
+                    current = id;
+                }
+            }
+        });
+
+        if (current) {
+            this.updateActiveBottomNavBySection(current);
+        }
     }
     
     async getReviewerId() {
@@ -375,27 +462,27 @@ class StudentDetailController {
                     
                     <div class="presentation-scores">
                         <div class="score-item">
-                            <span class="score-label">⏱️ Vaxt İdarəsi</span>
+                            <span class="score-label">Vaxt İdarəsi</span>
                             <span class="score-value">${pres.TimeManagement}/10</span>
                         </div>
                         <div class="score-item">
-                            <span class="score-label">🎤 Təqdimat Bacarığı</span>
+                            <span class="score-label">Təqdimat Bacarığı</span>
                             <span class="score-value">${pres.PresentationSkill}/10</span>
                         </div>
                         <div class="score-item">
-                            <span class="score-label">📊 Slayd Hazırlığı</span>
+                            <span class="score-label">Slayd Hazırlığı</span>
                             <span class="score-value">${pres.SlidePreparation}/10</span>
                         </div>
                         <div class="score-item">
-                            <span class="score-label">📚 Mövzu Əhatəsi</span>
+                            <span class="score-label">Mövzu Əhatəsi</span>
                             <span class="score-value">${pres.TopicCoverage}/10</span>
                         </div>
                         <div class="score-item">
-                            <span class="score-label">📈 İnkişaf</span>
+                            <span class="score-label">İnkişaf</span>
                             <span class="score-value">${pres.Progress}/10</span>
                         </div>
                         <div class="score-item">
-                            <span class="score-label">🎨 Slayd Dizaynı</span>
+                            <span class="score-label">Slayd Dizaynı</span>
                             <span class="score-value">${pres.SlideDesign}/10</span>
                         </div>
                     </div>
@@ -427,6 +514,7 @@ class StudentDetailController {
     setupTabNavigation() {
         const tabBtns = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
+        const bottomNavbar = document.querySelector('.bottom-navbar');
 
         tabBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -441,6 +529,15 @@ class StudentDetailController {
                 const targetContent = document.getElementById(`${tabName}Tab`);
                 if (targetContent) {
                     targetContent.classList.add('active');
+                }
+                
+                // Show/hide bottom navbar based on active tab
+                if (bottomNavbar) {
+                    if (tabName === 'write') {
+                        bottomNavbar.style.display = '';
+                    } else {
+                        bottomNavbar.style.display = 'none';
+                    }
                 }
             });
         });

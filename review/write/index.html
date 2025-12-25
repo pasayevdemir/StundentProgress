@@ -46,67 +46,107 @@
                 <button class="tab-btn active" data-tab="write">Qiymətləndirmə Yaz</button>
                 <button class="tab-btn" data-tab="presentation">Texniki Təqdimat</button>
                 <button class="tab-btn" data-tab="presentationHistory">Təqdimat Tarixçəsi</button>
-                <button class="tab-btn" data-tab="reviews">Stand-up Raportlar</button>
-                <button class="tab-btn" data-tab="modules">Modullar</button>
             </div>
 
-            <!-- Qiymətləndirmə Yaz Tab -->
+            <!-- Qiymətləndirmə Yaz Tab (Merged Content) -->
             <div class="tab-content active" id="writeTab">
-                <div class="review-form-section">
-                    <div class="form-header-row">
-                        <h3>Qiymətləndirmə Yaz</h3>
-                        <div class="ai-all-wrapper">
-                            <button type="button" class="ai-optimize-all-btn" id="optimizeAllBtn" title="Bütün sahələri AI ilə optimallaşdır">
-                                ✨ Hamısını Optimallaşdır
-                            </button>
-                            <span class="ai-loading-spinner-inline hidden" id="optimizeAllSpinner"></span>
+                
+                <!-- Section: Modules -->
+                <div id="modulesSection">
+                    <div class="modules-section">
+                        
+                        <!-- Date Selector -->
+                        <div class="date-selector">
+                            <div class="date-buttons">
+                                <button type="button" class="date-btn active" data-days="7">Həftəlik</button>
+                                <button type="button" class="date-btn" data-days="10">10 Gün</button>
+                                <button type="button" class="date-btn" data-days="30">Aylıq</button>
+                            </div>
+                            <div class="date-picker-wrapper">
+                                <label for="customDate">📅 Tarix:</label>
+                                <input type="date" id="customDate" class="custom-date-picker" max="">
+                            </div>
+                        </div>
+                        
+                        <p class="section-subtitle">Son 1 həftəlik progress dəyişiklikləri göstərilir</p>
+                        <div class="modules-grid" id="modulesGrid">
+                            <!-- Modullar buraya yüklənəcək -->
                         </div>
                     </div>
-                    <form id="reviewForm">
-                        <div class="form-group">
-                            <div class="label-row">
-                                <label for="learned">Bu günə kimi nə öyrəndi?</label>
-                                <div class="ai-btn-wrapper">
-                                    <button type="button" class="ai-optimize-btn" data-field="learned" title="AI ilə optimallaşdır">
-                                        ✨ AI
-                                    </button>
-                                    <span class="ai-loading-spinner-inline hidden" data-field="learned"></span>
-                                </div>
-                            </div>
-                            <textarea id="learned" name="learned" rows="5" placeholder="Tələbənin bu günə kimi öyrəndiyi mövzuları yazın..." required></textarea>
-                        </div>
+                </div>
 
-                        <div class="form-group">
-                            <div class="label-row">
-                                <label for="today">Bu gün nə edəcəkdir?</label>
-                                <div class="ai-btn-wrapper">
-                                    <button type="button" class="ai-optimize-btn" data-field="today" title="AI ilə optimallaşdır">
-                                        ✨ AI
-                                    </button>
-                                    <span class="ai-loading-spinner-inline hidden" data-field="today"></span>
-                                </div>
-                            </div>
-                            <textarea id="today" name="today" rows="5" placeholder="Tələbənin bu gün edəcəyi tapşırıqları yazın..." required></textarea>
-                        </div>
+                <div class="section-divider"></div>
 
-                        <div class="form-group">
-                            <div class="label-row">
-                                <label for="feedback">Öz Fikrin</label>
-                                <div class="ai-btn-wrapper">
-                                    <button type="button" class="ai-optimize-btn" data-field="feedback" title="AI ilə optimallaşdır">
-                                        ✨ AI
-                                    </button>
-                                    <span class="ai-loading-spinner-inline hidden" data-field="feedback"></span>
-                                </div>
-                            </div>
-                            <textarea id="feedback" name="feedback" rows="5" placeholder="Ümumi qiymətləndirmə və təkliflərinizi yazın..." required></textarea>
+                <!-- Section: Reviews (Reports) -->
+                <div id="reportsSection">
+                    <div class="previous-reviews-section">
+                        <h3>Son Qiymətləndirmələr</h3>
+                        <div class="reviews-list" id="reviewsList">
+                            <!-- Qiymətləndirmələr buraya yüklənəcək -->
                         </div>
+                    </div>
+                </div>
 
-                        <div class="form-buttons">
-                            <button type="button" class="cancel-btn" onclick="studentDetailController.goBack()">Ləğv et</button>
-                            <button type="submit" class="submit-btn">Göndər</button>
+                <div class="section-divider"></div>
+
+                <!-- Section: Review Form -->
+                <div id="writeSection">
+                    <div class="review-form-section">
+                        <div class="form-header-row">
+                            <h3>Qiymətləndirmə Yaz</h3>
+                            <div class="ai-all-wrapper">
+                                <button type="button" class="ai-optimize-all-btn" id="optimizeAllBtn" title="Bütün sahələri AI ilə optimallaşdır">
+                                    Optimallaşdır
+                                </button>
+                                <span class="ai-loading-spinner-inline hidden" id="optimizeAllSpinner"></span>
+                            </div>
                         </div>
-                    </form>
+                        <form id="reviewForm">
+                            <div class="form-group">
+                                <div class="label-row">
+                                    <label for="learned">Bu günə kimi nə öyrəndi?</label>
+                                    <div class="ai-btn-wrapper">
+                                        <button type="button" class="ai-optimize-btn" data-field="learned" title="AI ilə optimallaşdır">
+                                            AI
+                                        </button>
+                                        <span class="ai-loading-spinner-inline hidden" data-field="learned"></span>
+                                    </div>
+                                </div>
+                                <textarea id="learned" name="learned" rows="5" placeholder="Tələbənin bu günə kimi öyrəndiyi mövzuları yazın..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-row">
+                                    <label for="today">Bu gün nə edəcəkdir?</label>
+                                    <div class="ai-btn-wrapper">
+                                        <button type="button" class="ai-optimize-btn" data-field="today" title="AI ilə optimallaşdır">
+                                            AI
+                                        </button>
+                                        <span class="ai-loading-spinner-inline hidden" data-field="today"></span>
+                                    </div>
+                                </div>
+                                <textarea id="today" name="today" rows="5" placeholder="Tələbənin bu gün edəcəyi tapşırıqları yazın..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-row">
+                                    <label for="feedback">Öz Fikrin</label>
+                                    <div class="ai-btn-wrapper">
+                                        <button type="button" class="ai-optimize-btn" data-field="feedback" title="AI ilə optimallaşdır">
+                                            AI
+                                        </button>
+                                        <span class="ai-loading-spinner-inline hidden" data-field="feedback"></span>
+                                    </div>
+                                </div>
+                                <textarea id="feedback" name="feedback" rows="5" placeholder="Ümumi qiymətləndirmə və təkliflərinizi yazın..." required></textarea>
+                            </div>
+
+                            <div class="form-buttons">
+                                <button type="button" class="cancel-btn" onclick="studentDetailController.goBack()">Ləğv et</button>
+                                <button type="submit" class="submit-btn">Göndər</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -115,7 +155,7 @@
                 <div class="presentation-form-section">
                     <form id="presentationForm">
                         <div class="rating-group">
-                            <label class="rating-label" for="TimeManagement">⏱️ Vaxt İdarəsi (Time Management)</label>
+                            <label class="rating-label" for="TimeManagement">Vaxt İdarəsi</label>
                             <select name="TimeManagement" id="TimeManagement" class="rating-select" required>
                                 <option value="">Seçin...</option>
                                 <option value="0">0</option>
@@ -133,7 +173,7 @@
                         </div>
 
                         <div class="rating-group">
-                            <label class="rating-label" for="PresentationSkill">🎤 Təqdimat Bacarığı</label>
+                            <label class="rating-label" for="PresentationSkill">Təqdimat Bacarığı</label>
                             <select name="PresentationSkill" id="PresentationSkill" class="rating-select" required>
                                 <option value="">Seçin...</option>
                                 <option value="0">0</option>
@@ -152,7 +192,7 @@
                         </div>
 
                         <div class="rating-group">
-                            <label class="rating-label" for="SlidePreparation">📊 Slayd Hazırlıq Bacarığı</label>
+                            <label class="rating-label" for="SlidePreparation">Slayd Hazırlıq Bacarığı</label>
                             <select name="SlidePreparation" id="SlidePreparation" class="rating-select" required>
                                 <option value="">Seçin...</option>
                                 <option value="0">0</option>
@@ -171,7 +211,7 @@
                         </div>
 
                         <div class="rating-group">
-                            <label class="rating-label" for="TopicCoverage">📚 Mövzu Əhatə Etmə Bacarığı</label>
+                            <label class="rating-label" for="TopicCoverage">Mövzu Əhatə Etmə Bacarığı</label>
                             <select name="TopicCoverage" id="TopicCoverage" class="rating-select" required>
                                 <option value="">Seçin...</option>
                                 <option value="0">0</option>
@@ -208,7 +248,7 @@
                         </div>
 
                         <div class="rating-group">
-                            <label class="rating-label">🎨 Slayd Dizayn</label>
+                            <label class="rating-label">Slayd Dizayn</label>
                             <select name="SlideDesign" class="rating-select" required>
                                 <option value="" disabled selected>Seçin...</option>
                                 <option value="0">0</option>
@@ -227,7 +267,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="presentationDescription">📝 Açıqlama</label>
+                            <label for="presentationDescription">Açıqlama</label>
                             <textarea id="presentationDescription" name="Description" rows="5" placeholder="Təqdimat haqqında əlavə qeydlərinizi yazın..." required></textarea>
                         </div>
 
@@ -247,110 +287,23 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Qiymətlər Tab -->
-            <div class="tab-content" id="reviewsTab">
-                <div class="previous-reviews-section">
-                    <div class="reviews-list" id="reviewsList">
-                        <!-- Qiymətləndirmələr buraya yüklənəcək -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modullar Tab -->
-            <div class="tab-content" id="modulesTab">
-                <div class="modules-section">
-                    
-                    <!-- Date Selector -->
-                    <div class="date-selector">
-                        <div class="date-buttons">
-                            <button type="button" class="date-btn active" data-days="7">Həftəlik</button>
-                            <button type="button" class="date-btn" data-days="10">10 Gün</button>
-                            <button type="button" class="date-btn" data-days="30">Aylıq</button>
-                        </div>
-                        <div class="date-picker-wrapper">
-                            <label for="customDate">📅 Tarix:</label>
-                            <input type="date" id="customDate" class="custom-date-picker" max="">
-                        </div>
-                    </div>
-                    
-                    <p class="section-subtitle">Son 1 həftəlik progress dəyişiklikləri göstərilir</p>
-                    <div class="modules-grid" id="modulesGrid">
-                        <!-- Modullar buraya yüklənəcək -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Qiymətlər Tab -->
-            <div class="tab-content" id="reviewsTab">
-                <div class="previous-reviews-section">
-                    <h3>Son Qiymətləndirmələr</h3>
-                    <div class="reviews-list" id="reviewsList">
-                        <!-- Qiymətləndirmələr buraya yüklənəcək -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Qiymətləndirmə Yaz Tab -->
-            <div class="tab-content" id="writeTab">
-                <div class="review-form-section">
-                <div class="form-header-row">
-                    <h3>Qiymətləndirmə Yaz</h3>
-                    <div class="ai-all-wrapper">
-                        <button type="button" class="ai-optimize-all-btn" id="optimizeAllBtn" title="Bütün sahələri AI ilə optimallaşdır">
-                            ✨ Hamısını Optimallaşdır
-                        </button>
-                        <span class="ai-loading-spinner-inline hidden" id="optimizeAllSpinner"></span>
-                    </div>
-                </div>
-                <form id="reviewForm">
-                    <div class="form-group">
-                        <div class="label-row">
-                            <label for="learned">Bu günə kimi nə öyrəndi?</label>
-                            <div class="ai-btn-wrapper">
-                                <button type="button" class="ai-optimize-btn" data-field="learned" title="AI ilə optimallaşdır">
-                                    ✨ AI
-                                </button>
-                                <span class="ai-loading-spinner-inline hidden" data-field="learned"></span>
-                            </div>
-                        </div>
-                        <textarea id="learned" name="learned" rows="5" placeholder="Tələbənin bu günə kimi öyrəndiyi mövzuları yazın..." required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="label-row">
-                            <label for="today">Bu gün nə edəcəkdir?</label>
-                            <div class="ai-btn-wrapper">
-                                <button type="button" class="ai-optimize-btn" data-field="today" title="AI ilə optimallaşdır">
-                                    ✨ AI
-                                </button>
-                                <span class="ai-loading-spinner-inline hidden" data-field="today"></span>
-                            </div>
-                        </div>
-                        <textarea id="today" name="today" rows="5" placeholder="Tələbənin bu gün edəcəyi tapşırıqları yazın..." required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="label-row">
-                            <label for="feedback">Öz Fikrin</label>
-                            <div class="ai-btn-wrapper">
-                                <button type="button" class="ai-optimize-btn" data-field="feedback" title="AI ilə optimallaşdır">
-                                    ✨ AI
-                                </button>
-                                <span class="ai-loading-spinner-inline hidden" data-field="feedback"></span>
-                            </div>
-                        </div>
-                        <textarea id="feedback" name="feedback" rows="5" placeholder="Ümumi qiymətləndirmə və təkliflərinizi yazın..." required></textarea>
-                    </div>
-
-                    <div class="form-buttons">
-                        <button type="button" class="cancel-btn" onclick="studentDetailController.goBack()">Ləğv et</button>
-                        <button type="submit" class="submit-btn">Göndər</button>
-                    </div>
-                </form>
-            </div>
-            </div>
         </div>
+    </div>
+
+    <!-- Bottom Navbar (Mobile Only) -->
+    <div class="bottom-navbar">
+        <button class="bottom-nav-btn active" onclick="studentDetailController.scrollToSection('modulesSection')">
+            <span class="nav-icon">📊</span>
+            <span class="nav-text">Modullar</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="studentDetailController.scrollToSection('reportsSection')">
+            <span class="nav-icon">📋</span>
+            <span class="nav-text">Raportlar</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="studentDetailController.scrollToSection('writeSection')">
+            <span class="nav-icon">📝</span>
+            <span class="nav-text">Qiymətləndirmə</span>
+        </button>
     </div>
 
     <!-- Notification Popup -->

@@ -607,7 +607,6 @@ body {
 
     /* Mobile - Single Column for Presentation Form */
     .presentation-form-section form {
-        grid-template-columns: 1fr !important;
         gap: 1rem;
     }
 
@@ -798,6 +797,95 @@ body.dark-theme .review-reviewer {
 
 body.dark-theme .review-label {
     color: #e2e8f0;
+}
+
+/* ====================== */
+/* BOTTOM NAVIGATION */
+/* ====================== */
+.bottom-navbar {
+    display: none; /* Hidden on desktop */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    transition: all 0.2s;
+    gap: 0.25rem;
+}
+
+.bottom-nav-btn .nav-icon {
+    font-size: 1.5rem;
+}
+
+.bottom-nav-btn .nav-text {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.bottom-nav-btn.active {
+    color: var(--primary-color);
+}
+
+.bottom-nav-btn:hover {
+    background-color: #f9fafb;
+}
+
+/* Section Divider */
+.section-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 2rem 0;
+}
+
+/* Dark Theme Adjustments */
+body.dark-theme .bottom-navbar {
+    background: #1e293b;
+    border-top-color: #334155;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .bottom-nav-btn {
+    color: #94a3b8;
+}
+
+body.dark-theme .bottom-nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .bottom-nav-btn.active {
+    color: #6366f1;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .bottom-navbar {
+        display: flex;
+    }
+    
+    body {
+        padding-bottom: 5rem; /* Space for bottom navbar */
+    }
+    
+    .section-divider {
+        margin: 1.5rem 0;
+    }
 }
 
 body.dark-theme .review-text {
@@ -1276,7 +1364,8 @@ body.dark-theme .tab-btn.active {
 .presentation-form-section {
     background: var(--card-bg);
     border-radius: 0.75rem;
-    padding: 2rem;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .presentation-form-section h3 {
@@ -1291,12 +1380,15 @@ body.dark-theme .tab-btn.active {
     margin-bottom: 1.5rem;
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .presentation-form-section form {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .presentation-form-section .form-group,
@@ -1448,7 +1540,6 @@ body.dark-theme .rating-select option {
 .presentation-history-section {
     background: var(--card-bg);
     border-radius: 0.75rem;
-    padding: 2rem;
 }
 
 .presentation-history-section h3 {
@@ -1469,8 +1560,10 @@ body.dark-theme .rating-select option {
     background: #f9fafb;
     border: 1px solid #e5e7eb;
     border-radius: 0.75rem;
-    padding: 1.5rem;
+    padding: 1rem;
     transition: all 0.2s;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .presentation-card:hover {
@@ -1494,8 +1587,10 @@ body.dark-theme .rating-select option {
     justify-content: space-between;
     align-items: start;
     margin-bottom: 1rem;
-    flex-wrap: wrap;
     gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    white-space: nowrap;
 }
 
 .presentation-date {
@@ -1512,25 +1607,33 @@ body.dark-theme .rating-select option {
 
 .presentation-scores {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
     margin-bottom: 1rem;
+    width: 100%;
 }
 
 .score-item {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    text-align: center;
     padding: 0.75rem;
     background: white;
     border-radius: 0.5rem;
     border: 1px solid #e5e7eb;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .score-label {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: #6b7280;
     font-weight: 500;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .score-value {
