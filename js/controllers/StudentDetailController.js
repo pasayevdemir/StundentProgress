@@ -568,7 +568,20 @@ class StudentDetailController {
         
         const learned = document.getElementById('learned').value;
         const today = document.getElementById('today').value;
-        const feedback = document.getElementById('feedback').value;
+        let feedback = document.getElementById('feedback').value;
+        
+        // Get metrics and append to feedback
+        const prob = document.getElementById('metricProb')?.value.trim();
+        const lvt = document.getElementById('metricLvt')?.value.trim();
+        const level = document.getElementById('metricLevel')?.value.trim();
+        
+        // Append metrics to feedback if any are filled
+        if (prob || lvt || level) {
+            feedback += '\n';
+            if (prob) feedback += `\nPROB: ${prob}`;
+            if (lvt) feedback += `\nLVT: ${lvt}`;
+            if (level) feedback += `\nLEVEL: ${level}`;
+        }
         
         try {
             await ReviewModel.create({

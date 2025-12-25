@@ -132,6 +132,7 @@
                                 <div class="label-row">
                                     <label for="feedback">Öz Fikrin</label>
                                     <div class="ai-btn-wrapper">
+                                        <button type="button" class="none-btn" onclick="document.getElementById('feedback').value='NONE'" title="NONE yaz">NONE</button>
                                         <button type="button" class="ai-optimize-btn" data-field="feedback" title="AI ilə optimallaşdır">
                                             AI
                                         </button>
@@ -139,6 +140,31 @@
                                     </div>
                                 </div>
                                 <textarea id="feedback" name="feedback" rows="5" placeholder="Ümumi qiymətləndirmə və təkliflərinizi yazın..." required></textarea>
+                                
+                                <!-- Extra metrics inputs -->
+                                <div class="metrics-row">
+                                    <div class="metric-input">
+                                        <div class="metric-label-row">
+                                            <label for="metricProb">PROB</label>
+                                            <button type="button" class="none-btn-sm" onclick="document.getElementById('metricProb').value='NONE'">N</button>
+                                        </div>
+                                        <input type="text" id="metricProb" name="metricProb" placeholder="...">
+                                    </div>
+                                    <div class="metric-input">
+                                        <div class="metric-label-row">
+                                            <label for="metricLvt">LVT</label>
+                                            <button type="button" class="none-btn-sm" onclick="document.getElementById('metricLvt').value='NONE'">N</button>
+                                        </div>
+                                        <input type="text" id="metricLvt" name="metricLvt" placeholder="...">
+                                    </div>
+                                    <div class="metric-input">
+                                        <div class="metric-label-row">
+                                            <label for="metricLevel">LEVEL</label>
+                                            <button type="button" class="none-btn-sm" onclick="document.getElementById('metricLevel').value='NONE'">N</button>
+                                        </div>
+                                        <input type="text" id="metricLevel" name="metricLevel" placeholder="...">
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-buttons">
@@ -267,7 +293,10 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="presentationDescription">Açıqlama</label>
+                            <div class="label-row">
+                                <label for="presentationDescription">Açıqlama</label>
+                                <button type="button" class="none-btn" onclick="document.getElementById('presentationDescription').value='NONE'" title="NONE yaz">NONE</button>
+                            </div>
                             <textarea id="presentationDescription" name="Description" rows="5" placeholder="Təqdimat haqqında əlavə qeydlərinizi yazın..." required></textarea>
                         </div>
 

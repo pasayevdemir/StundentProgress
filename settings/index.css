@@ -339,15 +339,15 @@ body {
     right: 1.5rem;
     z-index: 9999;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateX(120%);
+    transform: translateX(calc(100% + 2rem));
+    opacity: 0;
+    visibility: hidden;
 }
 
 .notification-popup.show {
     transform: translateX(0);
-}
-
-.notification-popup.hidden {
-    display: block;
+    opacity: 1;
+    visibility: visible;
 }
 
 .notification-content {

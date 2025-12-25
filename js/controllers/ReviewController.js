@@ -86,10 +86,10 @@ class ReviewController {
         
         if (toggleBtn) {
             if (this.showAll) {
-                toggleBtn.textContent = '📋 Qiymətləndirilməmişlər';
+                toggleBtn.textContent = 'Qiymətsizlər';
                 toggleBtn.title = 'Bugün qiymətləndirilməmiş tələbələri göstər';
             } else {
-                toggleBtn.textContent = '👥 Bütün Tələbələr';
+                toggleBtn.textContent = 'Bütün Tələbələr';
                 toggleBtn.title = 'Bütün tələbələri göstər';
             }
         }
@@ -99,7 +99,7 @@ class ReviewController {
             if (this.showAll) {
                 tableTitle.textContent = `Bütün Tələbələr (${count})`;
             } else {
-                tableTitle.textContent = `Bugün Qiymətləndirilməmiş Tələbələr (${count})`;
+                tableTitle.textContent = `Qiymətləndirilməmiş Tələbələr (${count})`;
             }
         }
     }

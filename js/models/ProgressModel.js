@@ -367,7 +367,16 @@ class ProgressModel {
             })
         );
         
-        // Sort by performance ratio descending (best performers first)
-        return studentsWithPerformance.sort((a, b) => b.performanceRatio - a.performanceRatio);
+        // Sort by performance ratio descending, then by completed modules descending (best performers first)
+        return studentsWithPerformance.sort((a, b) => {
+            // Use integer comparison (floor) to treat same percentage as equal
+            const aRatio = Math.floor(a.performanceRatio);
+            const bRatio = Math.floor(b.performanceRatio);
+            if (bRatio !== aRatio) {
+                return bRatio - aRatio;
+            }
+            // When same percentage, sort by completed modules
+            return b.completedModules - a.completedModules;
+        });
     }
 }
