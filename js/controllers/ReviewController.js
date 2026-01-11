@@ -4,16 +4,14 @@ class ReviewController {
         this.currentUser = null;
         this.reviewerId = null;
         this.students = [];
-        this.allStudents = [];
-        this.studentsWithoutReview = [];
-        this.showAll = false;
+        this.allStudents = []; // Source of truth
     }
     
     async init() {
         await this.checkAuth();
         await this.getReviewerId();
         await this.loadStudents();
-        this.setupEventListeners();
+        this.setupFilters();
     }
     
     async checkAuth() {
@@ -40,7 +38,7 @@ class ReviewController {
             // Get all active students
             const allStudents = await StudentModel.getAll();
             
-            // Get today's reviews to filter out students who already have reviews
+            // Get today's reviews
             const todayReviews = await ReviewModel.getTodayReviews();
             const reviewedStudentIds = new Set(todayReviews.map(r => r.StudentID));
             
@@ -53,13 +51,8 @@ class ReviewController {
                 })
             );
             
-            // Filter students who don't have a review for today
-            this.studentsWithoutReview = this.allStudents.filter(
-                student => !student.hasReviewToday
-            );
-            
-            // Show students without review by default
-            this.displayStudents();
+            this.populateFilterOptions();
+            this.applyFilters(); // Initial render
             
         } catch (error) {
             console.error('Tələbələr yüklənə bilmədi:', error);
@@ -67,39 +60,148 @@ class ReviewController {
         }
     }
     
-    displayStudents() {
-        const studentsToShow = this.showAll ? this.allStudents : this.studentsWithoutReview;
-        this.students = studentsToShow;
-        this.renderStudentsTable(studentsToShow);
-        this.updateSearchResults(studentsToShow);
-        this.updateToggleButton();
-    }
-    
-    toggleView() {
-        this.showAll = !this.showAll;
-        this.displayStudents();
-    }
-    
-    updateToggleButton() {
-        const toggleBtn = document.getElementById('toggleViewBtn');
-        const tableTitle = document.getElementById('tableTitle');
-        
-        if (toggleBtn) {
-            if (this.showAll) {
-                toggleBtn.textContent = 'Qiymətsizlər';
-                toggleBtn.title = 'Bugün qiymətləndirilməmiş tələbələri göstər';
-            } else {
-                toggleBtn.textContent = 'Bütün Tələbələr';
-                toggleBtn.title = 'Bütün tələbələri göstər';
-            }
+    populateFilterOptions() {
+        // Populate Cohorts
+        const cohorts = [...new Set(this.allStudents.map(s => s.CohortName))].filter(Boolean).sort();
+        const cohortSelect = document.getElementById('filterCohort');
+        if (cohortSelect) {
+            cohorts.forEach(cohort => {
+                const option = document.createElement('option');
+                option.value = cohort;
+                option.textContent = cohort;
+                cohortSelect.appendChild(option);
+            });
         }
         
+        // Populate Modules (Count based)
+        const moduleSelect = document.getElementById('filterModule');
+        if (moduleSelect) {
+            // Add options for 0 to max modules
+            const maxModules = MODULE_COLUMNS.length;
+            for (let i = 0; i <= maxModules; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i === 0 ? '0' : i;
+                moduleSelect.appendChild(option);
+            }
+        }
+    }
+    
+    setupFilters() {
+        const inputs = [
+            'filterName', 'filterSurname', 'filterEmail',
+            'filterCohort', 'filterStatus', 'filterModule'
+        ];
+        
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', () => this.applyFilters());
+                el.addEventListener('change', () => this.applyFilters());
+            }
+        });
+        
+        const resetBtn = document.getElementById('resetFiltersBtn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetFilters());
+        }
+        
+        // Handle the old toggle view button if it still exists (as legacy or alternative)
+        // For now, we're relying on the Status filter, but let's make sure the old button doesn't break anything
+        // or effectively removes it if we updated the HTML to remove it. 
+        // We didn't remove it from HTML yet (it was in the header), so let's handle it or ignore it.
+        // Actually, let's keep the toggle button logic connected to the status filter for backward compatibility if user clicks it.
+        const toggleBtn = document.getElementById('toggleViewBtn');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                const statusSelect = document.getElementById('filterStatus');
+                if (statusSelect) {
+                    if (statusSelect.value === 'pending') {
+                        statusSelect.value = ''; // Show all
+                    } else {
+                        statusSelect.value = 'pending'; // Show pending
+                    }
+                    this.applyFilters();
+                }
+            });
+        }
+    }
+    
+    resetFilters() {
+        document.getElementById('filterName').value = '';
+        document.getElementById('filterSurname').value = '';
+        document.getElementById('filterEmail').value = '';
+        document.getElementById('filterCohort').value = '';
+        document.getElementById('filterStatus').value = ''; // Default to All on reset? Or Pending? Let's say All.
+        document.getElementById('filterModule').value = '';
+        this.applyFilters();
+    }
+    
+    applyFilters() {
+        const filters = {
+            name: document.getElementById('filterName')?.value.toLowerCase().trim() || '',
+            surname: document.getElementById('filterSurname')?.value.toLowerCase().trim() || '',
+            email: document.getElementById('filterEmail')?.value.toLowerCase().trim() || '',
+            cohort: document.getElementById('filterCohort')?.value || '',
+            status: document.getElementById('filterStatus')?.value || '',
+            module: document.getElementById('filterModule')?.value || ''
+        };
+        
+        this.students = this.allStudents.filter(student => {
+            // Name Filter
+            if (filters.name && !student.FirstName.toLowerCase().includes(filters.name)) return false;
+            
+            // Surname Filter
+            if (filters.surname && !student.LastName.toLowerCase().includes(filters.surname)) return false;
+            
+            // Email Filter
+            if (filters.email && !student.Email.toLowerCase().includes(filters.email)) return false;
+            
+            // Cohort Filter
+            if (filters.cohort && student.CohortName !== filters.cohort) return false;
+            
+            // Status Filter
+            if (filters.status) {
+                if (filters.status === 'pending' && student.hasReviewToday) return false;
+                if (filters.status === 'reviewed' && !student.hasReviewToday) return false;
+            }
+            
+            // Module Filter (Count based)
+            if (filters.module !== '') {
+                const requiredCount = parseInt(filters.module);
+                const actualCount = this.countCompletedModules(student.latestProgress);
+                if (actualCount !== requiredCount) return false;
+            }
+            
+            return true;
+        });
+        
+        this.renderStudentsTable(this.students);
+        this.updateHeader(this.students.length);
+    }
+    
+    updateHeader(count) {
+        const tableTitle = document.getElementById('tableTitle');
+        const toggleBtn = document.getElementById('toggleViewBtn');
+        const statusFilter = document.getElementById('filterStatus')?.value;
+        
         if (tableTitle) {
-            const count = this.showAll ? this.allStudents.length : this.studentsWithoutReview.length;
-            if (this.showAll) {
-                tableTitle.textContent = `Bütün Tələbələr (${count})`;
+            let title = 'Tələbələr';
+            if (statusFilter === 'pending') title = 'Qiymətləndirilməmiş Tələbələr';
+            else if (statusFilter === 'reviewed') title = 'Qiymətləndirilmiş Tələbələr';
+            else title = 'Bütün Tələbələr';
+            
+            tableTitle.textContent = `${title} (${count})`;
+        }
+        
+        if (toggleBtn) {
+            // Update toggle button state to reflect filters
+             if (statusFilter === 'pending') {
+                toggleBtn.textContent = '👥 Bütün Tələbələr';
+                toggleBtn.title = 'Bütün tələbələri göstər';
             } else {
-                tableTitle.textContent = `Qiymətləndirilməmiş Tələbələr (${count})`;
+                toggleBtn.textContent = '📋 Qiymətləndirilməmişlər';
+                toggleBtn.title = 'Bugün qiymətləndirilməmiş tələbələri göstər';
             }
         }
     }
@@ -138,44 +240,6 @@ class ReviewController {
             const value = progress[module];
             return value !== null && value !== undefined && value > 0;
         }).length;
-    }
-    
-    updateSearchResults(students) {
-        this.students = students;
-    }
-    
-    setupEventListeners() {
-        const searchInput = document.getElementById('searchInput');
-        const searchResults = document.getElementById('searchResults');
-        
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                const term = e.target.value.trim().toLowerCase();
-                
-                if (term.length === 0) {
-                    searchResults.classList.remove('active');
-                    return;
-                }
-                
-                const filtered = this.students.filter(s => {
-                    const fullName = `${s.FirstName} ${s.LastName}`.toLowerCase();
-                    return fullName.includes(term);
-                });
-                
-                this.renderSearchResults(filtered, searchResults);
-            });
-        }
-    }
-    
-    renderSearchResults(students, container) {
-        if (students.length === 0) {
-            container.innerHTML = '<div class="search-item">Nəticə tapılmadı</div>';
-        } else {
-            container.innerHTML = students.map(s => 
-                `<div class="search-item" onclick="reviewController.openStudentDetail(${s.ID})">${UIHelper.escapeHtml(s.FirstName + ' ' + s.LastName)}</div>`
-            ).join('');
-        }
-        container.classList.add('active');
     }
     
     openStudentDetail(studentId) {

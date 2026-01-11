@@ -74,67 +74,78 @@ body {
     transform: translateY(-1px);
 }
 
-/* Search Section */
-.search-section {
-    margin-bottom: 2.5rem;
+/* Filter Section */
+.filters-section {
+    margin-bottom: 2rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
 }
 
-.search-box {
-    position: relative;
-    max-width: 600px;
-    margin: 0 auto;
+.filters-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    align-items: end;
 }
 
-#searchInput {
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 0.625rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
     width: 100%;
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 0.75rem;
-    transition: all 0.3s;
-    background-color: #f9fafb;
+    background-color: #fff;
+    transition: all 0.2s;
+    height: 42px; /* Fixed height for alignment */
 }
 
-#searchInput:focus {
+.filter-group input:focus,
+.filter-group select:focus {
     outline: none;
     border-color: var(--primary-color);
-    background-color: #fff;
-    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
-.search-results {
-    position: absolute;
-    top: 110%;
-    left: 0;
-    right: 0;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    max-height: 300px;
-    overflow-y: auto;
-    z-index: 1000;
-    display: none;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+.filter-actions {
+    display: flex;
 }
 
-.search-results.active {
-    display: block;
-}
-
-.search-item {
-    padding: 0.75rem 1.25rem;
-    cursor: pointer;
-    border-bottom: 1px solid #f3f4f6;
-    transition: background-color 0.2s;
-}
-
-.search-item:last-child {
-    border-bottom: none;
-}
-
-.search-item:hover {
+.reset-btn {
+    padding: 0.625rem 1.25rem;
     background-color: #f3f4f6;
-    color: var(--primary-color);
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 42px;
+}
+
+.reset-btn:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+    transform: translateY(-1px);
 }
 
 /* Table Styles */
@@ -388,48 +399,38 @@ body.dark-theme .header h1 {
     color: #f1f5f9;
 }
 
-/* Dark theme search */
-body.dark-theme .search-box {
-    background: #334155;
-    border-color: #475569;
-}
-
-body.dark-theme #searchInput {
-    background: #334155;
-    border-color: #475569;
-    color: #e2e8f0;
-}
-
-body.dark-theme #searchInput:focus {
-    background: #1e293b;
-    border-color: #6366f1;
-}
-
-body.dark-theme #searchInput::placeholder {
-    color: #64748b;
-}
-
-body.dark-theme .search-results {
+/* Dark theme filters */
+body.dark-theme .filters-section {
     background: #1e293b;
     border-color: #334155;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
 }
 
-body.dark-theme .search-item {
-    border-bottom-color: #334155;
-    color: #e2e8f0;
+body.dark-theme .filter-group label {
+    color: #cbd5e1;
 }
 
-body.dark-theme .search-item:hover {
-    background: #334155;
-}
-
-body.dark-theme .search-item-name {
+body.dark-theme .filter-group input,
+body.dark-theme .filter-group select {
+    background-color: #334155;
+    border-color: #475569;
     color: #f1f5f9;
 }
 
-body.dark-theme .search-item-email {
-    color: #94a3b8;
+body.dark-theme .filter-group input:focus,
+body.dark-theme .filter-group select:focus {
+    border-color: #6366f1;
+    background-color: #1e293b;
+}
+
+body.dark-theme .reset-btn {
+    background-color: #334155;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-theme .reset-btn:hover {
+    background-color: #475569;
+    color: white;
 }
 
 /* Dark theme table */

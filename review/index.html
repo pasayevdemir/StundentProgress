@@ -34,11 +34,46 @@
                 </div>
             </div>
 
-            <!-- Axtarış Bölməsi -->
-            <div class="search-section">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="🔍 Tələbə adını axtarın..." autocomplete="off">
-                    <div id="searchResults" class="search-results"></div>
+            <!-- Filter Bölməsi -->
+            <div class="filters-section">
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="filterName">Adı</label>
+                        <input type="text" id="filterName" placeholder="Ad daxil edin...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterSurname">Soyadı</label>
+                        <input type="text" id="filterSurname" placeholder="Soyad daxil edin...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterEmail">Email</label>
+                        <input type="text" id="filterEmail" placeholder="Email daxil edin...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterCohort">Cohort</label>
+                        <select id="filterCohort">
+                            <option value="">Hamısı</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterStatus">Status</label>
+                        <select id="filterStatus">
+                            <option value="">Hamısı</option>
+                            <option value="pending">Gözləyir</option>
+                            <option value="reviewed">Qiymətləndirilib</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterModule">Bitmiş Modul Sayı</label>
+                        <select id="filterModule">
+                            <option value="">Hamısı</option>
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button id="resetFiltersBtn" class="reset-btn">
+                            ↺ Sıfırla
+                        </button>
+                    </div>
                 </div>
             </div>
 
