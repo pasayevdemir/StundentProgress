@@ -90,7 +90,8 @@ class ReviewController {
     setupFilters() {
         const inputs = [
             'filterName', 'filterSurname', 'filterEmail',
-            'filterCohort', 'filterStatus', 'filterModule'
+            'filterCohort', 'filterStatus', 'filterModule',
+            'quickSearch'
         ];
         
         inputs.forEach(id => {
@@ -100,6 +101,17 @@ class ReviewController {
                 el.addEventListener('change', () => this.applyFilters());
             }
         });
+
+        // Mobile Filter Toggle
+        const toggleFiltersBtn = document.getElementById('toggleFiltersBtn');
+        if (toggleFiltersBtn) {
+            toggleFiltersBtn.addEventListener('click', () => {
+                const container = document.getElementById('filtersContainer');
+                if (container) {
+                    container.classList.toggle('show');
+                }
+            });
+        }
         
         const resetBtn = document.getElementById('resetFiltersBtn');
         if (resetBtn) {
@@ -134,6 +146,8 @@ class ReviewController {
         document.getElementById('filterCohort').value = '';
         document.getElementById('filterStatus').value = ''; // Default to All on reset? Or Pending? Let's say All.
         document.getElementById('filterModule').value = '';
+        const quickSearch = document.getElementById('quickSearch');
+        if (quickSearch) quickSearch.value = '';
         this.applyFilters();
     }
     
@@ -144,10 +158,20 @@ class ReviewController {
             email: document.getElementById('filterEmail')?.value.toLowerCase().trim() || '',
             cohort: document.getElementById('filterCohort')?.value || '',
             status: document.getElementById('filterStatus')?.value || '',
-            module: document.getElementById('filterModule')?.value || ''
+            module: document.getElementById('filterModule')?.value || '',
+            quickSearch: document.getElementById('quickSearch')?.value.toLowerCase().trim() || ''
         };
         
         this.students = this.allStudents.filter(student => {
+            // Quick Search
+            if (filters.quickSearch) {
+                const search = filters.quickSearch;
+                const match = student.FirstName.toLowerCase().includes(search) ||
+                              student.LastName.toLowerCase().includes(search) ||
+                              student.Email.toLowerCase().includes(search);
+                if (!match) return false;
+            }
+
             // Name Filter
             if (filters.name && !student.FirstName.toLowerCase().includes(filters.name)) return false;
             

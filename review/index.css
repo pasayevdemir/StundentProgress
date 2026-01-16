@@ -74,16 +74,6 @@ body {
     transform: translateY(-1px);
 }
 
-/* Filter Section */
-.filters-section {
-    margin-bottom: 2rem;
-    background: white;
-    padding: 1.5rem;
-    border-radius: 1rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    border: 1px solid #e5e7eb;
-}
-
 .filters-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -355,6 +345,11 @@ body {
     font-weight: 600;
 }
 
+/* Default: Hide mobile search on desktop */
+.mobile-search-container {
+    display: none;
+}
+
 @media (max-width: 768px) {
     body {
         padding: 1rem;
@@ -380,6 +375,105 @@ body {
     .students-table td {
         padding: 0.75rem 1rem;
     }
+
+    /* Mobile Search & Filter Toggle */
+    .mobile-search-container {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+        align-items: stretch;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        color: #9ca3af;
+        pointer-events: none;
+        width: 18px;
+        height: 18px;
+    }
+
+    .mobile-search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 16px;
+        background-color: #f9fafb;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .mobile-search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    .filter-toggle-btn {
+        width: 48px;
+        padding: 0;
+        background-color: white;
+        color: var(--text-color);
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-toggle-btn:hover, .filter-toggle-btn.active {
+        background-color: #f3f4f6;
+        border-color: #d1d5db;
+        transform: translateY(-1px);
+    }
+
+    .filter-toggle-btn svg {
+        color: #6b7280;
+    }
+    
+    /* Toggle Visibility of Filters on Mobile */
+    #filtersContainer {
+        display: none;
+        background: #f8fafc;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        margin-top: 1rem;
+        gap: 0.75rem;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    #filtersContainer.show {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    #filtersContainer .filter-actions {
+        grid-column: 1 / -1;
+    }
+    
+    #filtersContainer .filter-actions .reset-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 }
 
 /* ====================== */
@@ -397,12 +491,6 @@ body.dark-theme .container {
 
 body.dark-theme .header h1 {
     color: #f1f5f9;
-}
-
-/* Dark theme filters */
-body.dark-theme .filters-section {
-    background: #1e293b;
-    border-color: #334155;
 }
 
 body.dark-theme .filter-group label {
@@ -496,4 +584,34 @@ body.dark-theme .students-table .status.pending {
 /* Dark theme notification */
 body.dark-theme .notification-content {
     background: #059669;
+}
+
+/* Dark theme support for mobile search */
+body.dark-theme .mobile-search-input {
+    background-color: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+
+body.dark-theme .mobile-search-input:focus {
+    border-color: #6366f1;
+    background-color: #1e293b;
+}
+
+body.dark-theme .filter-toggle-btn {
+    background-color: #334155;
+    border-color: #475569;
+}
+
+body.dark-theme .filter-toggle-btn:hover, body.dark-theme .filter-toggle-btn.active {
+    background-color: #475569;
+}
+
+body.dark-theme .filter-toggle-btn svg {
+    color: #e2e8f0;
+}
+
+body.dark-theme #filtersContainer {
+    background: #1e293b;
+    border-color: #334155;
 }
