@@ -42,14 +42,16 @@ class ReviewController {
             const todayReviews = await ReviewModel.getTodayReviews();
             const reviewedStudentIds = new Set(todayReviews.map(r => r.StudentID));
             
-            // Get latest progress for all students
-            this.allStudents = await Promise.all(
-                allStudents.map(async (student) => {
-                    const progress = await ProgressModel.getLatestByStudentId(student.ID);
-                    const hasReviewToday = reviewedStudentIds.has(student.ID);
-                    return { ...student, latestProgress: progress, hasReviewToday };
-                })
-            );
+            // Get latest progress for ALL students in a SINGLE query (avoids N+1 problem)
+            const studentIds = allStudents.map(s => s.ID);
+            const progressMap = await ProgressModel.getLatestProgressForStudents(studentIds);
+            
+            // Map students with their progress (no additional DB calls needed)
+            this.allStudents = allStudents.map(student => {
+                const progress = progressMap[student.ID] || null;
+                const hasReviewToday = reviewedStudentIds.has(student.ID);
+                return { ...student, latestProgress: progress, hasReviewToday };
+            });
             
             this.populateFilterOptions();
             this.applyFilters(); // Initial render

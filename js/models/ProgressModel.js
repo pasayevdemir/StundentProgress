@@ -1,5 +1,74 @@
 // Progress Model
 class ProgressModel {
+    /**
+     * Get the latest progress for multiple students in a single query.
+     * This avoids N+1 queries by fetching all relevant progress records at once.
+     * @param {number[]} studentIds - Array of student IDs
+     * @returns {Object} Map of studentId -> latest progress record
+     */
+    static async getLatestProgressForStudents(studentIds) {
+        if (!studentIds || studentIds.length === 0) {
+            return {};
+        }
+
+        // Fetch all progress records for all students in one query
+        // We order by CreatedAt desc so we can pick the first one per student
+        const { data, error } = await supabaseClient
+            .from('Progresses')
+            .select('*')
+            .in('StudentID', studentIds)
+            .order('CreatedAt', { ascending: false });
+
+        if (error) throw error;
+
+        // Group by StudentID and take the first (latest) record for each
+        const progressMap = {};
+        if (data) {
+            for (const progress of data) {
+                // Only keep the first (latest) record for each student
+                if (!progressMap[progress.StudentID]) {
+                    progressMap[progress.StudentID] = progress;
+                }
+            }
+        }
+
+        return progressMap;
+    }
+
+    /**
+     * Get the start dates (earliest progress date) for multiple students in a single query.
+     * @param {number[]} studentIds - Array of student IDs
+     * @returns {Object} Map of studentId -> start date string
+     */
+    static async getStartDatesForStudents(studentIds) {
+        if (!studentIds || studentIds.length === 0) {
+            return {};
+        }
+
+        // Fetch all progress records with just the dates we need
+        // Order by ProgressDate ascending so we can pick the earliest per student
+        const { data, error } = await supabaseClient
+            .from('Progresses')
+            .select('StudentID, ProgressDate, CreatedAt')
+            .in('StudentID', studentIds)
+            .order('ProgressDate', { ascending: true });
+
+        if (error) throw error;
+
+        // Group by StudentID and take the first (earliest) record for each
+        const startDateMap = {};
+        if (data) {
+            for (const progress of data) {
+                // Only keep the first (earliest) record for each student
+                if (!startDateMap[progress.StudentID]) {
+                    startDateMap[progress.StudentID] = progress.ProgressDate || progress.CreatedAt;
+                }
+            }
+        }
+
+        return startDateMap;
+    }
+
     static async getLatestByStudentId(studentId) {
         const { data, error } = await supabaseClient
             .from('Progresses')
@@ -331,41 +400,47 @@ class ProgressModel {
     static async getAllStudentsWithPerformance() {
         const students = await StudentModel.getAll();
         
-        const studentsWithPerformance = await Promise.all(
-            students.map(async (student) => {
-                const progress = await this.getLatestByStudentId(student.ID);
-                const startDate = await this.getStudentStartDate(student.ID);
-                
-                // Calculate actual progress
-                const { totalProgress, moduleCount, completedModules, maxPossible } = 
-                    this.calculateTotalProgress(progress);
-                
-                // Calculate time in program
-                const monthsInProgram = this.calculateMonthsInProgram(startDate);
-                
-                // Calculate expected progress based on time
-                const expectedProgress = this.calculateExpectedProgress(monthsInProgram);
-                
-                // Calculate performance ratio
-                const performanceRatio = this.calculatePerformanceRatio(totalProgress, expectedProgress);
-                
-                // Get performance level
-                const performance = this.getPerformanceLevel(performanceRatio);
-                
-                return {
-                    ...student,
-                    progress,
-                    startDate: startDate,
-                    monthsInProgram: monthsInProgram,
-                    totalProgress: totalProgress,
-                    expectedProgress: expectedProgress,
-                    performanceRatio: performanceRatio,
-                    completedModules: completedModules,
-                    activeModuleCount: moduleCount,
-                    performance
-                };
-            })
-        );
+        // Get all data in batch queries (avoids N+1 problem)
+        const studentIds = students.map(s => s.ID);
+        const [progressMap, startDateMap] = await Promise.all([
+            this.getLatestProgressForStudents(studentIds),
+            this.getStartDatesForStudents(studentIds)
+        ]);
+        
+        // Process all students synchronously using the pre-fetched data
+        const studentsWithPerformance = students.map(student => {
+            const progress = progressMap[student.ID] || null;
+            const startDate = startDateMap[student.ID] || null;
+            
+            // Calculate actual progress
+            const { totalProgress, moduleCount, completedModules, maxPossible } = 
+                this.calculateTotalProgress(progress);
+            
+            // Calculate time in program
+            const monthsInProgram = this.calculateMonthsInProgram(startDate);
+            
+            // Calculate expected progress based on time
+            const expectedProgress = this.calculateExpectedProgress(monthsInProgram);
+            
+            // Calculate performance ratio
+            const performanceRatio = this.calculatePerformanceRatio(totalProgress, expectedProgress);
+            
+            // Get performance level
+            const performance = this.getPerformanceLevel(performanceRatio);
+            
+            return {
+                ...student,
+                progress,
+                startDate: startDate,
+                monthsInProgram: monthsInProgram,
+                totalProgress: totalProgress,
+                expectedProgress: expectedProgress,
+                performanceRatio: performanceRatio,
+                completedModules: completedModules,
+                activeModuleCount: moduleCount,
+                performance
+            };
+        });
         
         // Sort by performance ratio descending, then by completed modules descending (best performers first)
         return studentsWithPerformance.sort((a, b) => {
