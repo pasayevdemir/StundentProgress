@@ -64,88 +64,117 @@ class ReviewModel {
         return data;
     }
     
-    // Get all reviews with reviewer info for statistics
-    static async getAllReviews() {
-        const { data, error } = await supabaseClient
-            .from('Review')
-            .select(`
-                *,
-                Reviewer:Students!Review_ReviewerID_fkey(ID, FirstName, LastName),
-                Student:Students!Review_StudentID_fkey(ID, FirstName, LastName)
-            `)
-            .order('WriteDate', { ascending: false });
-        
-        if (error) throw error;
-        return data;
-    }
-    
-    // Get statistics summary
-    static async getStatistics() {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        weekAgo.setHours(0, 0, 0, 0);
-        
-        const monthAgo = new Date();
-        monthAgo.setMonth(monthAgo.getMonth() - 1);
-        monthAgo.setHours(0, 0, 0, 0);
-        
-        // Get all reviews
-        const { data: allReviews, error: allError } = await supabaseClient
-            .from('Review')
-            .select('ID, WriteDate, ReviewerID');
-        
-        if (allError) throw allError;
-        
-        // Calculate statistics
-        const todayReviews = allReviews.filter(r => {
-            const date = new Date(r.WriteDate);
-            return date >= today && date < tomorrow;
+    // Helper to get Baku date boundaries
+    static getBakuBoundaries() {
+        // Baku is UTC+4
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Baku',
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: 'numeric', minute: 'numeric', second: 'numeric',
+            hour12: false
         });
         
-        const weekReviews = allReviews.filter(r => {
-            const date = new Date(r.WriteDate);
-            return date >= weekAgo;
-        });
+        const parts = formatter.formatToParts(now);
+        const map = new Map(parts.map(p => [p.type, p.value]));
         
-        const monthReviews = allReviews.filter(r => {
-            const date = new Date(r.WriteDate);
-            return date >= monthAgo;
-        });
+        const year = parseInt(map.get('year'));
+        const month = parseInt(map.get('month')) - 1;
+        const day = parseInt(map.get('day'));
+        
+        // Baku 00:00:00 = UTC - 4 hours
+        const startOfTodayUTC = new Date(Date.UTC(year, month, day, 0, 0, 0) - (4 * 60 * 60 * 1000));
+        
+        const weekAgoUTC = new Date(startOfTodayUTC);
+        weekAgoUTC.setDate(weekAgoUTC.getDate() - 7);
+        
+        const monthAgoUTC = new Date(startOfTodayUTC);
+        monthAgoUTC.setMonth(monthAgoUTC.getMonth() - 1);
+        
+        const endOfTodayUTC = new Date(startOfTodayUTC);
+        endOfTodayUTC.setDate(endOfTodayUTC.getDate() + 1);
         
         return {
-            total: allReviews.length,
-            today: todayReviews.length,
-            thisWeek: weekReviews.length,
-            thisMonth: monthReviews.length,
-            allReviews: allReviews
+            today: startOfTodayUTC,
+            tomorrow: endOfTodayUTC,
+            weekAgo: weekAgoUTC,
+            monthAgo: monthAgoUTC
+        };
+    }
+
+    // Get all reviews with reviewer info for statistics (No Limit)
+    static async getAllReviews() {
+        let allData = [];
+        let page = 0;
+        const pageSize = 1000;
+        let hasMore = true;
+
+        while (hasMore) {
+            const { data, error } = await supabaseClient
+                .from('Review')
+                .select(`
+                    *,
+                    Reviewer:Students!Review_ReviewerID_fkey(ID, FirstName, LastName),
+                    Student:Students!Review_StudentID_fkey(ID, FirstName, LastName)
+                `)
+                .order('WriteDate', { ascending: false })
+                .range(page * pageSize, (page + 1) * pageSize - 1);
+            
+            if (error) throw error;
+            
+            if (data && data.length > 0) {
+                allData = [...allData, ...data];
+                if (data.length < pageSize) hasMore = false;
+                page++;
+            } else {
+                hasMore = false;
+            }
+        }
+        return allData;
+    }
+    
+    // Get statistics summary (Asia/Baku)
+    static async getStatistics() {
+        const boundaries = this.getBakuBoundaries();
+        
+        // Fetch counts using count aggregation to bypass row limits
+        const [
+            { count: totalCount, error: totalError },
+            { count: todayCount, error: todayError },
+            { count: weekCount, error: weekError },
+            { count: monthCount, error: monthError }
+        ] = await Promise.all([
+            supabaseClient.from('Review').select('*', { count: 'exact', head: true }),
+            supabaseClient.from('Review').select('*', { count: 'exact', head: true })
+                .gte('WriteDate', boundaries.today.toISOString())
+                .lt('WriteDate', boundaries.tomorrow.toISOString()),
+            supabaseClient.from('Review').select('*', { count: 'exact', head: true })
+                .gte('WriteDate', boundaries.weekAgo.toISOString()),
+            supabaseClient.from('Review').select('*', { count: 'exact', head: true })
+                .gte('WriteDate', boundaries.monthAgo.toISOString())
+        ]);
+        
+        if (totalError) throw totalError;
+        
+        return {
+            total: totalCount || 0,
+            today: todayCount || 0,
+            thisWeek: weekCount || 0,
+            thisMonth: monthCount || 0
         };
     }
     
-    // Get reviewer statistics
+    // Get reviewer statistics (Asia/Baku & No Limit)
     static async getReviewerStats() {
-        const { data, error } = await supabaseClient
-            .from('Review')
-            .select(`
-                ReviewerID,
-                WriteDate,
-                Reviewer:Students!Review_ReviewerID_fkey(ID, FirstName, LastName)
-            `);
-        
-        if (error) throw error;
+        const allData = await this.getAllReviews(); // Uses the unlimited fetcher
+        const boundaries = this.getBakuBoundaries();
+        const startOfToday = boundaries.today.getTime();
+        const endOfToday = boundaries.tomorrow.getTime();
         
         // Group by reviewer
         const reviewerMap = new Map();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
         
-        data.forEach(review => {
+        allData.forEach(review => {
             const reviewerId = review.ReviewerID;
             if (!reviewerMap.has(reviewerId)) {
                 reviewerMap.set(reviewerId, {
@@ -160,16 +189,19 @@ class ReviewModel {
             const reviewer = reviewerMap.get(reviewerId);
             reviewer.totalReviews++;
             
-            const reviewDate = new Date(review.WriteDate);
-            if (reviewDate >= today && reviewDate < tomorrow) {
+            const reviewDate = new Date(review.WriteDate).getTime();
+            if (reviewDate >= startOfToday && reviewDate < endOfToday) {
                 reviewer.todayReviews++;
             }
             
-            if (!reviewer.lastReviewDate || reviewDate > new Date(reviewer.lastReviewDate)) {
+            if (!reviewer.lastReviewDate || reviewDate > new Date(reviewer.lastReviewDate).getTime()) {
                 reviewer.lastReviewDate = review.WriteDate;
             }
         });
         
-        return Array.from(reviewerMap.values()).sort((a, b) => b.totalReviews - a.totalReviews);
+        return Array.from(reviewerMap.values()).sort((a, b) => {
+            if (b.todayReviews !== a.todayReviews) return b.todayReviews - a.todayReviews;
+            return b.totalReviews - a.totalReviews;
+        });
     }
 }
